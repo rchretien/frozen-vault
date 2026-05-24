@@ -1,5 +1,5 @@
 {% if flash %}
-  <section class="flash flash-{{ flash_level }}">
+  <section class="flash flash-{{ flash_level }}" role="{% if flash_level == 'error' %}alert{% else %}status{% endif %}" aria-live="polite">
     <div class="flash-icon" aria-hidden="true">
       {% if flash_level == 'error' %}
         {% set icon_name = 'x-circle' %}

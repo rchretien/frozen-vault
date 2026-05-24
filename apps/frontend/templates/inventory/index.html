@@ -15,7 +15,7 @@
           <span class="metric-label">Tracked items</span>
           <strong>{{ total }}</strong>
         </div>
-        <a class="quick-add-fab" href="{{ request.url_for('new_product_page') }}">
+        <a class="quick-add-fab" href="{{ request.url_for('new_product_page') }}?return_to={{ current_url | urlencode }}">
           {% set icon_name = 'plus' %}
           {% set icon_class = 'app-icon app-icon-sm' %}
           {% include 'partials/_heroicon.html' %}

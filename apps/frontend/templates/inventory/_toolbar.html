@@ -2,7 +2,7 @@
   <form
     id="inventory-controls"
     class="inventory-controls"
-    action="{{ request.url_for('inventory_home') }}"
+    action="{{ filter_action_url }}"
     method="get"
   >
     <label class="field-group search-group">
@@ -15,20 +15,22 @@
           type="search"
           name="q"
           value="{{ filters.q }}"
-          placeholder="Start typing a product name"
+          placeholder="Start typing a product name…"
+          autocomplete="off"
           hx-get="{{ request.url_for('render_inventory_list_fragment') }}"
           hx-trigger="keyup changed delay:300ms, search"
           hx-target="#inventory-results"
           hx-swap="outerHTML"
           hx-include="#inventory-controls"
+          hx-push-url="true"
         >
       </div>
     </label>
 
-    <div class="urgency-tabs" role="tablist" aria-label="Inventory scope">
-      <a class="urgency-tab {% if filters.urgency == 'all' %}is-active{% endif %}" href="{{ request.url_for('inventory_home') }}">All</a>
-      <a class="urgency-tab {% if filters.urgency == 'soon' %}is-active{% endif %}" href="{{ request.url_for('inventory_soon') }}">Soon</a>
-      <a class="urgency-tab {% if filters.urgency == 'expired' %}is-active{% endif %}" href="{{ request.url_for('inventory_soon') }}?urgency=expired">Expired</a>
+    <div class="urgency-tabs" aria-label="Inventory scope">
+      <a class="urgency-tab {% if filters.urgency == 'all' %}is-active{% endif %}" href="{{ filter_urls.all }}" {% if filters.urgency == 'all' %}aria-current="page"{% endif %}>All</a>
+      <a class="urgency-tab {% if filters.urgency == 'soon' %}is-active{% endif %}" href="{{ filter_urls.soon }}" {% if filters.urgency == 'soon' %}aria-current="page"{% endif %}>Soon</a>
+      <a class="urgency-tab {% if filters.urgency == 'expired' %}is-active{% endif %}" href="{{ filter_urls.expired }}" {% if filters.urgency == 'expired' %}aria-current="page"{% endif %}>Expired</a>
     </div>
 
     <details class="advanced-filters" {% if filters.product_type or filters.product_location or filters.sort != 'newest' %}open{% endif %}>
@@ -49,6 +51,7 @@
             hx-target="#inventory-results"
             hx-swap="outerHTML"
             hx-include="#inventory-controls"
+            hx-push-url="true"
           >
             {% for option_value, option_label in sort_options %}
               <option value="{{ option_value }}" {% if filters.sort == option_value %}selected{% endif %}>{{ option_label }}</option>
@@ -65,6 +68,7 @@
             hx-target="#inventory-results"
             hx-swap="outerHTML"
             hx-include="#inventory-controls"
+            hx-push-url="true"
           >
             <option value="">All types</option>
             {% for option in product_type_options %}
@@ -82,6 +86,7 @@
             hx-target="#inventory-results"
             hx-swap="outerHTML"
             hx-include="#inventory-controls"
+            hx-push-url="true"
           >
             <option value="">All locations</option>
             {% for option in product_location_options %}

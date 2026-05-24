@@ -7,7 +7,7 @@
     <section class="screen-summary home-summary" aria-label="Welcome dashboard">
       <div class="summary-copy-block">
         <p class="eyebrow">Welcome back</p>
-        <h2 class="screen-headline">Run the fridge from one calm dashboard.</h2>
+        <h2 class="screen-headline">Keep your fridge feeling fresh.</h2>
         <p class="hero-copy">Check what is expiring, jump into the full inventory grid, and add products without landing straight in the management view.</p>
 
         <div class="home-action-row">
@@ -96,7 +96,7 @@
             {% for product in urgent_preview %}
               {% set type_visual = product_type_visual(product.product_type) %}
               {% set product_status = expiry_status(product.expiry_date) %}
-              <a class="home-list-row tone-{{ type_visual.tone }}" href="{{ request.url_for('edit_product_page', product_id=product.id) }}">
+              <a class="home-list-row tone-{{ type_visual.tone }}" href="{{ request.url_for('edit_product_page', product_id=product.id) }}?return_to=/">
                 <span class="product-card-icon home-list-icon" aria-hidden="true">
                   {% include 'partials/_product_type_icon.html' %}
                 </span>
@@ -136,7 +136,7 @@
           <div class="home-list">
             {% for product in recent_preview %}
               {% set type_visual = product_type_visual(product.product_type) %}
-              <a class="home-list-row tone-{{ type_visual.tone }}" href="{{ request.url_for('edit_product_page', product_id=product.id) }}">
+              <a class="home-list-row tone-{{ type_visual.tone }}" href="{{ request.url_for('edit_product_page', product_id=product.id) }}?return_to=/">
                 <span class="product-card-icon home-list-icon" aria-hidden="true">
                   {% include 'partials/_product_type_icon.html' %}
                 </span>

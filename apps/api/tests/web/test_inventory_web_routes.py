@@ -47,6 +47,26 @@ def _create_product_through_api(client: TestClient, product_name: str) -> int:
     return response.json()["product_id"]
 
 
+def _create_product_through_api_with_expiry(
+    client: TestClient, product_name: str, expires_in_days: int
+) -> int:
+    """Create a product with a relative expiry date and return its identifier."""
+    payload = {
+        "product_name": product_name,
+        "description": f"{product_name} description",
+        "quantity": 1,
+        "unit": ProductUnitEnum.BOXES.value,
+        "expiry_date": (
+            datetime.now(tz=config.brussels_tz) + timedelta(days=expires_in_days)
+        ).isoformat(),
+        "product_location": ProductLocationEnum.REFRIGERATOR.value,
+        "product_type": ProductTypeEnum.FRUIT.value,
+    }
+    response = client.post("/inventory/create", json=payload)
+    assert response.status_code == httpx.codes.CREATED
+    return response.json()["product_id"]
+
+
 def test_home_page_renders_welcome_dashboard(client: TestClient) -> None:
     """The root page should render the welcome dashboard instead of the full inventory grid."""
     response = client.get("/")
@@ -58,6 +78,32 @@ def test_home_page_renders_welcome_dashboard(client: TestClient) -> None:
     assert "Home" in response.text
 
 
+def test_home_page_shows_urgent_items_outside_recent_preview(client: TestClient) -> None:
+    """The dashboard urgent list should not be limited to the newest products."""
+    _create_product_through_api_with_expiry(client, "Old urgent cream", 1)
+    for index in range(5):
+        _create_product_through_api_with_expiry(client, f"New fresh item {index}", 10)
+
+    response = client.get("/")
+
+    assert response.status_code == httpx.codes.OK
+    assert "Old urgent cream" in response.text
+
+
+def test_create_product_expiring_today_is_not_immediately_expired(client: TestClient) -> None:
+    """Date-only web expiry should be treated as valid for the selected calendar day."""
+    today = datetime.now(tz=config.brussels_tz).strftime("%Y-%m-%d")
+
+    response = client.post(
+        "/web/inventory", data=_html_form_payload(product_name="Today Milk", expiry_date_date=today)
+    )
+
+    assert response.status_code == httpx.codes.OK
+    assert "Today Milk" in response.text
+    assert "Product created successfully" in response.text
+    assert "inventory-status-badge expired" not in response.text
+
+
 def test_inventory_page_renders_mobile_controls(client: TestClient) -> None:
     """The dedicated inventory page should expose the table controls and add action."""
     response = client.get("/web/inventory")
@@ -67,6 +113,44 @@ def test_inventory_page_renders_mobile_controls(client: TestClient) -> None:
     assert "Add product" in response.text
     assert "Inventory" in response.text
     assert "More" in response.text
+
+
+def test_inventory_mobile_cards_are_clickable_and_swipe_deletable(client: TestClient) -> None:
+    """Mobile inventory cards should expose edit-on-card and swipe delete affordances."""
+    product_id = _create_product_through_api(client, "Blueberries")
+
+    response = client.get("/web/inventory")
+
+    assert response.status_code == httpx.codes.OK
+    assert 'class="product-card-swipe" data-swipe-card' in response.text
+    assert "data-swipe-surface" in response.text
+    assert f"/web/inventory/{product_id}/edit?return_to=" in response.text
+    assert 'aria-label="Edit Blueberries"' in response.text
+    assert 'class="danger-button swipe-delete-button"' in response.text
+    assert 'tabindex="-1"' in response.text
+    assert "Tap to edit" not in response.text
+    assert "inventory-table" not in response.text
+
+
+def test_inventory_filters_push_state_to_url_and_keep_filter_links(client: TestClient) -> None:
+    """HTMX filters should produce shareable URLs and urgency links should preserve filters."""
+    response = client.get(
+        "/web/inventory",
+        params={"q": "milk", "product_type": ProductTypeEnum.DAIRY.value, "sort": "name_asc"},
+    )
+
+    assert response.status_code == httpx.codes.OK
+    assert "hx-push-url" in response.text
+    assert "q=milk" in response.text
+    assert 'role="tablist"' not in response.text
+
+
+def test_bottom_navigation_marks_current_page_for_assistive_tech(client: TestClient) -> None:
+    """Active bottom navigation link should expose page state semantically."""
+    response = client.get("/web/inventory")
+
+    assert response.status_code == httpx.codes.OK
+    assert 'aria-current="page"' in response.text
 
 
 def test_inventory_list_fragment_filters_by_name_prefix(client: TestClient) -> None:
@@ -158,8 +242,26 @@ def test_create_product_page_rerenders_errors(client: TestClient) -> None:
     response = client.post("/web/inventory", data=_html_form_payload(quantity="0"))
 
     assert response.status_code == httpx.codes.OK
+    assert "Something needs attention" in response.text
+    assert (
+        "Product could not be saved. Check the highlighted fields and try again." in response.text
+    )
     assert "greater than or equal to 1" in response.text
     assert "Create product" in response.text
+    assert 'aria-invalid="true"' in response.text
+    assert "field-error-quantity" in response.text
+
+
+def test_flash_and_results_regions_are_announced(client: TestClient) -> None:
+    """Flash feedback and refreshed result fragments should be exposed as live regions."""
+    create_response = client.post("/web/inventory", data=_html_form_payload(product_name="Ricotta"))
+    list_response = client.get("/web/inventory/list")
+
+    assert create_response.status_code == httpx.codes.OK
+    assert 'role="status"' in create_response.text
+    assert list_response.status_code == httpx.codes.OK
+    assert 'id="inventory-results"' in list_response.text
+    assert 'aria-live="polite"' in list_response.text
 
 
 def test_create_product_page_handles_missing_expiry_field(client: TestClient) -> None:
@@ -170,6 +272,10 @@ def test_create_product_page_handles_missing_expiry_field(client: TestClient) ->
     response = client.post("/web/inventory", data=payload)
 
     assert response.status_code == httpx.codes.OK
+    assert "Something needs attention" in response.text
+    assert (
+        "Product could not be saved. Check the highlighted fields and try again." in response.text
+    )
     assert "Field required" in response.text
     assert "Create product" in response.text
 

@@ -38,7 +38,7 @@ def test_read_root(client: TestClient) -> None:
     assert httpx.codes.is_success(response.status_code)
     assert response.headers["content-type"].startswith("text/html")
     assert "FrozenVault" in response.text
-    assert "Run the fridge from one calm dashboard." in response.text
+    assert "Keep your fridge feeling fresh." in response.text
 
 
 def test_create_product_and_list(client: TestClient) -> None:

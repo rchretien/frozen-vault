@@ -5,7 +5,7 @@
       <h2>{{ title }}</h2>
       <p class="muted-text">Keep the details short and practical so the item is easy to scan later.</p>
     </div>
-    <a class="utility-link" href="{{ request.url_for('inventory_home') }}">
+    <a class="utility-link" href="{{ return_to }}">
       {% set icon_name = 'squares-2x2' %}
       {% set icon_class = 'app-icon app-icon-sm' %}
       {% include 'partials/_heroicon.html' %}
@@ -14,8 +14,9 @@
   </div>
 
   <form class="product-form" action="{{ action_url }}" method="post" novalidate>
+    <input type="hidden" name="return_to" value="{{ return_to }}">
     {% if errors.__all__ %}
-      <div class="flash flash-error">
+      <div class="flash flash-error" role="alert" aria-live="polite">
         <p>{{ errors.__all__ }}</p>
       </div>
     {% endif %}
@@ -33,14 +34,14 @@
 
       <label class="field-group">
         <span>Product name</span>
-        <input name="product_name" type="text" value="{{ form_data.product_name }}" required maxlength="50">
-        {% if errors.product_name %}<small class="field-error">{{ errors.product_name }}</small>{% endif %}
+        <input name="product_name" type="text" value="{{ form_data.product_name }}" required maxlength="50" autocomplete="off" {% if errors.product_name %}aria-invalid="true" aria-describedby="field-error-product-name"{% endif %}>
+        {% if errors.product_name %}<small id="field-error-product-name" class="field-error">{{ errors.product_name }}</small>{% endif %}
       </label>
 
       <label class="field-group">
         <span>Description</span>
-        <textarea name="description" rows="3" maxlength="256">{{ form_data.description }}</textarea>
-        {% if errors.description %}<small class="field-error">{{ errors.description }}</small>{% endif %}
+        <textarea name="description" rows="3" maxlength="256" autocomplete="off" {% if errors.description %}aria-invalid="true" aria-describedby="field-error-description"{% endif %}>{{ form_data.description }}</textarea>
+        {% if errors.description %}<small id="field-error-description" class="field-error">{{ errors.description }}</small>{% endif %}
       </label>
     </section>
 
@@ -58,18 +59,18 @@
       <div class="control-grid compact-grid">
         <label class="field-group">
           <span>Quantity</span>
-          <input name="quantity" type="number" min="1" inputmode="numeric" value="{{ form_data.quantity }}" required>
-          {% if errors.quantity %}<small class="field-error">{{ errors.quantity }}</small>{% endif %}
+          <input name="quantity" type="number" min="1" inputmode="numeric" value="{{ form_data.quantity }}" required autocomplete="off" {% if errors.quantity %}aria-invalid="true" aria-describedby="field-error-quantity"{% endif %}>
+          {% if errors.quantity %}<small id="field-error-quantity" class="field-error">{{ errors.quantity }}</small>{% endif %}
         </label>
 
         <label class="field-group">
           <span>Unit</span>
-          <select name="unit" required>
+          <select name="unit" required {% if errors.unit %}aria-invalid="true" aria-describedby="field-error-unit"{% endif %}>
             {% for option in unit_options %}
               <option value="{{ option }}" {% if form_data.unit == option %}selected{% endif %}>{{ option }}</option>
             {% endfor %}
           </select>
-          {% if errors.unit %}<small class="field-error">{{ errors.unit }}</small>{% endif %}
+          {% if errors.unit %}<small id="field-error-unit" class="field-error">{{ errors.unit }}</small>{% endif %}
         </label>
       </div>
     </section>
@@ -88,11 +89,11 @@
       <div class="control-grid compact-grid">
         <label class="field-group">
           <span>Expiry date</span>
-          <input name="expiry_date_date" type="date" value="{{ form_data.expiry_date_date }}" required>
+          <input name="expiry_date_date" type="date" value="{{ form_data.expiry_date_date }}" required autocomplete="off" {% if errors.expiry_date %}aria-invalid="true" aria-describedby="field-error-expiry-date"{% endif %}>
         </label>
       </div>
 
-      {% if errors.expiry_date %}<small class="field-error">{{ errors.expiry_date }}</small>{% endif %}
+      {% if errors.expiry_date %}<small id="field-error-expiry-date" class="field-error">{{ errors.expiry_date }}</small>{% endif %}
     </section>
 
     <section class="form-section">
@@ -109,28 +110,28 @@
       <div class="control-grid compact-grid">
         <label class="field-group">
           <span>Location</span>
-          <select name="product_location" required>
+          <select name="product_location" required {% if errors.product_location %}aria-invalid="true" aria-describedby="field-error-product-location"{% endif %}>
             {% for option in product_location_options %}
               <option value="{{ option }}" {% if form_data.product_location == option %}selected{% endif %}>{{ option }}</option>
             {% endfor %}
           </select>
-          {% if errors.product_location %}<small class="field-error">{{ errors.product_location }}</small>{% endif %}
+          {% if errors.product_location %}<small id="field-error-product-location" class="field-error">{{ errors.product_location }}</small>{% endif %}
         </label>
 
         <label class="field-group">
           <span>Type</span>
-          <select name="product_type" required>
+          <select name="product_type" required {% if errors.product_type %}aria-invalid="true" aria-describedby="field-error-product-type"{% endif %}>
             {% for option in product_type_options %}
               <option value="{{ option }}" {% if form_data.product_type == option %}selected{% endif %}>{{ option }}</option>
             {% endfor %}
           </select>
-          {% if errors.product_type %}<small class="field-error">{{ errors.product_type }}</small>{% endif %}
+          {% if errors.product_type %}<small id="field-error-product-type" class="field-error">{{ errors.product_type }}</small>{% endif %}
         </label>
       </div>
     </section>
 
     <div class="form-actions sticky-actions">
-      <a class="secondary-button" href="{{ request.url_for('inventory_home') }}">
+      <a class="secondary-button" href="{{ return_to }}">
         {% set icon_name = 'x-circle' %}
         {% set icon_class = 'app-icon app-icon-sm' %}
         {% include 'partials/_heroicon.html' %}

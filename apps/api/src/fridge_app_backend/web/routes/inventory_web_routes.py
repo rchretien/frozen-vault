@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from typing import Any
+from urllib.parse import urlencode
 
 from fastapi import APIRouter, Form, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -29,6 +30,7 @@ inventory_web_router = APIRouter(include_in_schema=False)
 
 DEFAULT_LIMIT = 10
 LIMIT_STEP = 10
+FORM_ERROR_FLASH = "Product could not be saved. Check the highlighted fields and try again."
 SORT_OPTIONS = {
     "newest": (OrderByEnum.ID, False),
     "expiry": (OrderByEnum.EXPIRY_DATE, True),
@@ -70,6 +72,42 @@ def _list_query_params(filters: dict[str, Any], *, limit: int | None = None) -> 
         "sort": filters["sort"],
         "limit": limit if limit is not None else filters["limit"],
     }
+
+
+def _current_path_with_query(request: Request) -> str:
+    """Return the current relative path plus query string for return navigation."""
+    query_items = [
+        (key, value)
+        for key, value in request.query_params.multi_items()
+        if key not in {"flash", "flash_level"}
+    ]
+    if query_items:
+        return f"{request.url.path}?{urlencode(query_items)}"
+    return request.url.path
+
+
+def _safe_return_to(return_to: str | None, *, fallback: str = "/") -> str:
+    """Keep return navigation inside the app to avoid open redirects."""
+    if return_to and return_to.startswith("/") and not return_to.startswith("//"):
+        return return_to
+    return fallback
+
+
+def _with_query_params(base_url: str, **params: str) -> str:
+    """Append query parameters to a relative URL."""
+    separator = "&" if "?" in base_url else "?"
+    return f"{base_url}{separator}{urlencode(params)}"
+
+
+def _redirect_with_flash(
+    *, return_to: str | None, message: str, level: str = "success"
+) -> RedirectResponse:
+    """Redirect to a safe relative URL with flash feedback attached."""
+    safe_return_to = _safe_return_to(return_to)
+    return RedirectResponse(
+        url=_with_query_params(safe_return_to, flash=message, flash_level=level),
+        status_code=HTTP_303_SEE_OTHER,
+    )
 
 
 def _get_inventory_context(
@@ -172,6 +210,15 @@ def _get_inventory_context(
             )
         )
 
+    current_url = _current_path_with_query(request)
+    filter_params = _list_query_params(filters)
+    all_params = {**filter_params, "urgency": "all"}
+    soon_params = {**filter_params, "urgency": "soon"}
+    expired_params = {**filter_params, "urgency": "expired"}
+    all_url = str(request.url_for("inventory_home").include_query_params(**all_params))
+    soon_url = str(request.url_for("inventory_soon").include_query_params(**soon_params))
+    expired_url = str(request.url_for("inventory_soon").include_query_params(**expired_params))
+
     return {
         "request": request,
         "active_nav": active_nav,
@@ -183,6 +230,11 @@ def _get_inventory_context(
         "expired_count": expired_count,
         "has_more": has_more,
         "load_more_url": load_more_url,
+        "current_url": current_url,
+        "filter_urls": {"all": all_url, "soon": soon_url, "expired": expired_url},
+        "filter_action_url": str(
+            request.url_for("inventory_soon" if active_nav == "soon" else "inventory_home")
+        ),
         "sort_options": [
             ("newest", "Newest first"),
             ("expiry", "Expiry soonest"),
@@ -239,8 +291,10 @@ def _render_form_page(
     form_data: dict[str, str],
     errors: dict[str, str] | None = None,
     active_nav: str = "add",
+    return_to: str | None = None,
 ) -> HTMLResponse:
     """Render the shared product form page."""
+    form_errors = errors or {}
     return templates.TemplateResponse(
         request=request,
         name="inventory/form_page.html",
@@ -249,8 +303,11 @@ def _render_form_page(
             "submit_label": submit_label,
             "action_url": action_url,
             "form_data": form_data,
-            "errors": errors or {},
+            "errors": form_errors,
             "active_nav": active_nav,
+            "return_to": _safe_return_to(return_to, fallback="/web/inventory"),
+            "flash": FORM_ERROR_FLASH if form_errors else None,
+            "flash_level": "error",
             "unit_options": [enum.value for enum in ProductUnitEnum],
             "product_type_options": [enum.value for enum in ProductTypeEnum],
             "product_location_options": [enum.value for enum in ProductLocationEnum],
@@ -284,10 +341,26 @@ def _get_home_context(*, request: Request, session: SessionDependency) -> dict[s
         limit=5,
         active_nav="home",
     )
-    urgent_preview = []
-    for group in context["product_groups"]:
-        if group["key"] in {"expired", "expiring-soon"}:
-            urgent_preview.extend(group["products"])
+    expired_preview_response = product_crud.get_multi_filtered_paginated(
+        session=session,
+        limit=4,
+        offset=0,
+        urgency="expired",
+        order_by=OrderByEnum.EXPIRY_DATE,
+        ascending=True,
+    )
+    expired_preview = [ProductRead.from_model(product) for product in expired_preview_response.data]
+    soon_preview_response = product_crud.get_multi_filtered_paginated(
+        session=session,
+        limit=max(4 - len(expired_preview), 0),
+        offset=0,
+        urgency="soon",
+        order_by=OrderByEnum.EXPIRY_DATE,
+        ascending=True,
+    )
+    urgent_preview = expired_preview + [
+        ProductRead.from_model(product) for product in soon_preview_response.data
+    ]
     context.update(
         {
             "screen_title": "Welcome",
@@ -340,7 +413,7 @@ def _coalesce_expiry_date(*, expiry_date: str, expiry_date_date: str) -> str:
         return expiry_date
     if not expiry_date_date.strip():
         return ""
-    return f"{expiry_date_date.strip()}T12:00"
+    return f"{expiry_date_date.strip()}T23:59:59"
 
 
 def _missing_field_errors(form_data: dict[str, str]) -> dict[str, str]:
@@ -456,7 +529,7 @@ async def render_inventory_list_fragment(
 
 
 @inventory_web_router.get("/web/inventory/new", response_class=HTMLResponse)
-async def new_product_page(request: Request) -> HTMLResponse:
+async def new_product_page(request: Request, return_to: str = Query(default="/")) -> HTMLResponse:
     """Render the add-product page."""
     return _render_form_page(
         request=request,
@@ -465,6 +538,7 @@ async def new_product_page(request: Request) -> HTMLResponse:
         action_url=str(request.url_for("create_product_page")),
         form_data=_empty_form_data(),
         active_nav="add",
+        return_to=return_to,
     )
 
 
@@ -480,6 +554,7 @@ async def create_product_page(
     expiry_date_date: str = Form(default=""),
     product_location: str = Form(default=""),
     product_type: str = Form(default=""),
+    return_to: str = Form(default="/"),
 ) -> Response:
     """Create a product from the mobile form and redirect back home."""
     form_data = _product_from_form(
@@ -504,6 +579,7 @@ async def create_product_page(
             form_data=form_data,
             errors=missing_errors,
             active_nav="add",
+            return_to=return_to,
         )
 
     try:
@@ -523,6 +599,7 @@ async def create_product_page(
             form_data=form_data,
             errors=errors,
             active_nav="add",
+            return_to=return_to,
         )
 
     try:
@@ -536,17 +613,18 @@ async def create_product_page(
             form_data=form_data,
             errors={"__all__": str(exc)},
             active_nav="add",
+            return_to=return_to,
         )
 
-    return RedirectResponse(
-        url="/?flash=Product+created+successfully&flash_level=success",
-        status_code=HTTP_303_SEE_OTHER,
-    )
+    return _redirect_with_flash(return_to=return_to, message="Product created successfully")
 
 
 @inventory_web_router.get("/web/inventory/{product_id}/edit", response_class=HTMLResponse)
 async def edit_product_page(
-    request: Request, product_id: int, session: SessionDependency
+    request: Request,
+    product_id: int,
+    session: SessionDependency,
+    return_to: str = Query(default="/web/inventory"),
 ) -> HTMLResponse:
     """Render the edit page for a single product."""
     product = product_crud.get(session=session, row_id=product_id)
@@ -565,6 +643,7 @@ async def edit_product_page(
         action_url=str(request.url_for("update_product_page", product_id=product_id)),
         form_data=form_data,
         active_nav="add",
+        return_to=return_to,
     )
 
 
@@ -583,6 +662,7 @@ async def update_product_page(
     expiry_date_date: str = Form(default=""),
     product_location: str = Form(default=""),
     product_type: str = Form(default=""),
+    return_to: str = Form(default="/web/inventory"),
 ) -> Response:
     """Update a product from the mobile form and redirect back home."""
     product = product_crud.get(session=session, row_id=product_id)
@@ -613,6 +693,7 @@ async def update_product_page(
             form_data=form_data,
             errors=missing_errors,
             active_nav="add",
+            return_to=return_to,
         )
 
     try:
@@ -632,6 +713,7 @@ async def update_product_page(
             form_data=form_data,
             errors=errors,
             active_nav="add",
+            return_to=return_to,
         )
 
     try:
@@ -645,16 +727,16 @@ async def update_product_page(
             form_data=form_data,
             errors={"__all__": str(exc)},
             active_nav="add",
+            return_to=return_to,
         )
 
-    return RedirectResponse(
-        url="/?flash=Product+updated+successfully&flash_level=success",
-        status_code=HTTP_303_SEE_OTHER,
-    )
+    return _redirect_with_flash(return_to=return_to, message="Product updated successfully")
 
 
 @inventory_web_router.post("/web/inventory/{product_id}/delete", response_class=Response)
-async def delete_product_page(product_id: int, session: SessionDependency) -> Response:
+async def delete_product_page(
+    product_id: int, session: SessionDependency, return_to: str = Form(default="/")
+) -> Response:
     """Delete a product from the web UI and redirect back home."""
     product = product_crud.get(session=session, row_id=product_id)
     if product is None:
@@ -663,7 +745,4 @@ async def delete_product_page(product_id: int, session: SessionDependency) -> Re
         )
 
     product_crud.remove(session=session, row_id=product.id)
-    return RedirectResponse(
-        url="/?flash=Product+deleted+successfully&flash_level=success",
-        status_code=HTTP_303_SEE_OTHER,
-    )
+    return _redirect_with_flash(return_to=return_to, message="Product deleted successfully")

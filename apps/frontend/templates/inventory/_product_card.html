@@ -1,29 +1,42 @@
 {% set type_visual = product_type_visual(product.product_type) %}
-<article class="product-card {{ expiry_status(product.expiry_date) }} tone-{{ type_visual.tone }}">
-  <div class="product-card-header">
-    <div class="product-card-identity">
-      <div class="product-card-topline">
-        <span class="product-card-icon" aria-hidden="true">
-          {% include 'partials/_product_type_icon.html' %}
-        </span>
-        <div class="product-card-tags">
-          <span class="micro-tag">{{ product_location_label(product.product_location) }}</span>
-          <span class="micro-tag micro-tag-type">{{ type_visual.label }}</span>
-        </div>
-      </div>
-      <h3>{{ product.product_name }}</h3>
-      <p class="product-inline-meta">{{ product.quantity }} {{ product_unit_label(product.unit) }}{% if product.description %} · {{ product.description }}{% endif %}</p>
-    </div>
-    <div class="expiry-sticker {{ expiry_status(product.expiry_date) }}">
-      <span class="expiry-sticker-label">{{ expiry_status_label(product.expiry_date) }}</span>
-      <strong>{{ format_date_display(product.expiry_date) }}</strong>
-    </div>
-  </div>
-
-  <div class="card-actions utility-actions">
-    <a class="secondary-button" href="{{ request.url_for('edit_product_page', product_id=product.id) }}">Edit</a>
+{% set edit_url = request.url_for('edit_product_page', product_id=product.id) %}
+{% if current_url is defined %}
+  {% set edit_url = edit_url ~ '?return_to=' ~ (current_url | urlencode) %}
+{% endif %}
+<div class="product-card-swipe" data-swipe-card>
+  <div class="product-card-swipe-actions" aria-hidden="true">
     <form action="{{ request.url_for('delete_product_page', product_id=product.id) }}" method="post" data-confirm="Delete {{ product.product_name }}?">
-      <button class="danger-button" type="submit">Delete</button>
+      {% if current_url is defined %}<input type="hidden" name="return_to" value="{{ current_url }}">{% endif %}
+      <button class="danger-button swipe-delete-button" type="submit" tabindex="-1">
+        {% set icon_name = 'trash' %}
+        {% set icon_class = 'app-icon app-icon-sm' %}
+        {% include 'partials/_heroicon.html' %}
+        <span>Delete</span>
+      </button>
     </form>
   </div>
-</article>
+
+  <article class="product-card {{ expiry_status(product.expiry_date) }} tone-{{ type_visual.tone }}" data-swipe-surface>
+    <a class="product-card-main" href="{{ edit_url }}" aria-label="Edit {{ product.product_name }}">
+      <div class="product-card-header">
+        <div class="product-card-identity">
+          <div class="product-card-topline">
+            <span class="product-card-icon" aria-hidden="true">
+              {% include 'partials/_product_type_icon.html' %}
+            </span>
+            <div class="product-card-tags">
+              <span class="micro-tag">{{ product_location_label(product.product_location) }}</span>
+              <span class="micro-tag micro-tag-type">{{ type_visual.label }}</span>
+            </div>
+          </div>
+          <h3>{{ product.product_name }}</h3>
+          <p class="product-inline-meta">{{ product.quantity }} {{ product_unit_label(product.unit) }}{% if product.description %} · {{ product.description }}{% endif %}</p>
+        </div>
+        <div class="expiry-sticker {{ expiry_status(product.expiry_date) }}">
+          <span class="expiry-sticker-label">{{ expiry_status_label(product.expiry_date) }}</span>
+          <strong>{{ format_date_display(product.expiry_date) }}</strong>
+        </div>
+      </div>
+    </a>
+  </article>
+</div>

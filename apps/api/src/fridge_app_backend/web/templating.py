@@ -91,6 +91,7 @@ def product_unit_label(value: Any) -> str:
 
 templates = Jinja2Templates(directory=str(TEMPLATE_DIR))
 templates.env.globals.update(
+    config=config,
     format_datetime_display=format_datetime_display,
     format_date_display=format_date_display,
     format_date_input=format_date_input,

@@ -3,20 +3,25 @@
     <svg viewBox="0 0 280 240" role="presentation">
       <defs>
         <linearGradient id="fridgeBody" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#4f8fff"/>
-          <stop offset="100%" stop-color="#2356d8"/>
+          <stop offset="0%" stop-color="var(--primary-strong)"/>
+          <stop offset="52%" stop-color="var(--primary)"/>
+          <stop offset="100%" stop-color="var(--accent-mint)"/>
+        </linearGradient>
+        <linearGradient id="fridgeInner" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="rgba(243, 248, 251, 0.98)"/>
+          <stop offset="100%" stop-color="rgba(225, 240, 247, 0.94)"/>
         </linearGradient>
       </defs>
       <rect x="66" y="18" width="148" height="200" rx="34" fill="url(#fridgeBody)"/>
-      <rect x="84" y="36" width="112" height="164" rx="24" fill="#f7fbff"/>
-      <rect x="84" y="116" width="112" height="4" rx="2" fill="#dce8ff"/>
-      <rect x="178" y="67" width="7" height="28" rx="3.5" fill="#dce8ff"/>
-      <rect x="178" y="146" width="7" height="28" rx="3.5" fill="#dce8ff"/>
-      <rect x="101" y="61" width="34" height="14" rx="7" fill="#83d6a3"/>
-      <rect x="142" y="61" width="26" height="14" rx="7" fill="#ffca6b"/>
-      <rect x="101" y="139" width="48" height="14" rx="7" fill="#ff8da4"/>
-      <circle cx="164" cy="147" r="10" fill="#83d6a3"/>
-      <circle cx="140" cy="222" r="6" fill="#1b46b2" fill-opacity="0.18"/>
+      <rect x="84" y="36" width="112" height="164" rx="24" fill="url(#fridgeInner)"/>
+      <rect x="84" y="116" width="112" height="4" rx="2" fill="var(--border-strong)"/>
+      <rect x="178" y="67" width="7" height="28" rx="3.5" fill="var(--accent-citrus)"/>
+      <rect x="178" y="146" width="7" height="28" rx="3.5" fill="var(--accent-citrus)"/>
+      <rect x="101" y="61" width="34" height="14" rx="7" fill="var(--accent-mint)"/>
+      <rect x="142" y="61" width="26" height="14" rx="7" fill="var(--accent-citrus)"/>
+      <rect x="101" y="139" width="48" height="14" rx="7" fill="var(--primary)"/>
+      <circle cx="164" cy="147" r="10" fill="var(--accent-mint)"/>
+      <circle cx="140" cy="222" r="6" fill="var(--primary)" fill-opacity="0.22"/>
     </svg>
   </div>
 
