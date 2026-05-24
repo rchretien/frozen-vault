@@ -169,6 +169,7 @@ dd {
 .header-brand {
   display: grid;
   gap: 0.25rem;
+  padding-left: 1rem;
 }
 
 .brand-home-link {
@@ -391,11 +392,11 @@ dd {
 }
 
 .home-shortcuts-header {
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.85rem;
 }
 
 .home-panel-header {
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.85rem;
 }
 
 .home-action-row {
@@ -640,7 +641,7 @@ dd {
 }
 
 .visual-dot.is-danger {
-  background: var(--primary);
+  background: var(--danger);
 }
 
 .metric-pill,
@@ -712,6 +713,10 @@ dd {
   border-radius: var(--radius-md);
   font-weight: 700;
   white-space: nowrap;
+}
+
+.header-action {
+  margin-right: 1rem;
 }
 
 .quick-add-fab,
@@ -931,6 +936,7 @@ dd {
 }
 
 .inventory-results {
+  display: grid;
   gap: 1rem;
   transition: opacity var(--motion-medium) var(--ease-out), transform var(--motion-medium) var(--ease-out);
 }

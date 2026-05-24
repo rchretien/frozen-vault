@@ -3,21 +3,25 @@
     <svg viewBox="0 0 280 240" role="presentation">
       <defs>
         <linearGradient id="fridgeBody" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#ffb633"/>
-          <stop offset="58%" stop-color="#d84f62"/>
-          <stop offset="100%" stop-color="#9362d7"/>
+          <stop offset="0%" stop-color="var(--primary-strong)"/>
+          <stop offset="52%" stop-color="var(--primary)"/>
+          <stop offset="100%" stop-color="var(--accent-mint)"/>
+        </linearGradient>
+        <linearGradient id="fridgeInner" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="rgba(243, 248, 251, 0.98)"/>
+          <stop offset="100%" stop-color="rgba(225, 240, 247, 0.94)"/>
         </linearGradient>
       </defs>
       <rect x="66" y="18" width="148" height="200" rx="34" fill="url(#fridgeBody)"/>
-      <rect x="84" y="36" width="112" height="164" rx="24" fill="#fffdf8"/>
-      <rect x="84" y="116" width="112" height="4" rx="2" fill="#ffe1ad"/>
-      <rect x="178" y="67" width="7" height="28" rx="3.5" fill="#ffd08c"/>
-      <rect x="178" y="146" width="7" height="28" rx="3.5" fill="#ffd08c"/>
-      <rect x="101" y="61" width="34" height="14" rx="7" fill="#47b97d"/>
-      <rect x="142" y="61" width="26" height="14" rx="7" fill="#ffb633"/>
-      <rect x="101" y="139" width="48" height="14" rx="7" fill="#d84f62"/>
-      <circle cx="164" cy="147" r="10" fill="#47b97d"/>
-      <circle cx="140" cy="222" r="6" fill="#d84f62" fill-opacity="0.2"/>
+      <rect x="84" y="36" width="112" height="164" rx="24" fill="url(#fridgeInner)"/>
+      <rect x="84" y="116" width="112" height="4" rx="2" fill="var(--border-strong)"/>
+      <rect x="178" y="67" width="7" height="28" rx="3.5" fill="var(--accent-citrus)"/>
+      <rect x="178" y="146" width="7" height="28" rx="3.5" fill="var(--accent-citrus)"/>
+      <rect x="101" y="61" width="34" height="14" rx="7" fill="var(--accent-mint)"/>
+      <rect x="142" y="61" width="26" height="14" rx="7" fill="var(--accent-citrus)"/>
+      <rect x="101" y="139" width="48" height="14" rx="7" fill="var(--primary)"/>
+      <circle cx="164" cy="147" r="10" fill="var(--accent-mint)"/>
+      <circle cx="140" cy="222" r="6" fill="var(--primary)" fill-opacity="0.22"/>
     </svg>
   </div>
 

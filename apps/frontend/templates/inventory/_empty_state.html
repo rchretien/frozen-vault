@@ -1,12 +1,23 @@
 <section class="empty-state panel">
   <div class="empty-state-visual" aria-hidden="true">
     <svg viewBox="0 0 160 120" role="presentation">
-      <rect x="38" y="12" width="84" height="96" rx="24" fill="#dce8ff"/>
-      <rect x="48" y="24" width="64" height="72" rx="18" fill="#ffffff"/>
-      <rect x="48" y="58" width="64" height="3" rx="1.5" fill="#dce8ff"/>
-      <circle cx="68" cy="42" r="8" fill="#ffc76d"/>
-      <path d="M92 40h12M92 48h10" fill="none" stroke="#9ab6e8" stroke-linecap="round" stroke-width="4"/>
-      <path d="M54 84c7-8 17-12 30-12 11 0 21 3 29 10" fill="none" stroke="#ff9fb3" stroke-linecap="round" stroke-width="5"/>
+      <defs>
+        <linearGradient id="emptyFridgeShell" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="var(--primary-strong)"/>
+          <stop offset="55%" stop-color="var(--accent-blueberry)"/>
+          <stop offset="100%" stop-color="var(--primary)"/>
+        </linearGradient>
+        <linearGradient id="emptyFridgeInner" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="rgba(243, 248, 251, 0.98)"/>
+          <stop offset="100%" stop-color="rgba(226, 239, 248, 0.94)"/>
+        </linearGradient>
+      </defs>
+      <rect x="38" y="12" width="84" height="96" rx="24" fill="url(#emptyFridgeShell)"/>
+      <rect x="48" y="24" width="64" height="72" rx="18" fill="url(#emptyFridgeInner)"/>
+      <rect x="48" y="58" width="64" height="3" rx="1.5" fill="var(--border-strong)"/>
+      <circle cx="68" cy="42" r="8" fill="var(--accent-citrus)"/>
+      <path d="M92 40h12M92 48h10" fill="none" stroke="var(--accent-blueberry)" stroke-linecap="round" stroke-width="4"/>
+      <path d="M54 84c7-8 17-12 30-12 11 0 21 3 29 10" fill="none" stroke="var(--danger)" stroke-linecap="round" stroke-width="5"/>
     </svg>
   </div>
 
