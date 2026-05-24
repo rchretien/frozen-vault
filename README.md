@@ -40,6 +40,38 @@ Start the backend container from the workspace root:
 docker compose up app
 ```
 
+## Raspberry Pi LAN Deployment
+
+The production deployment is intended to run inside the local network only. It uses Nginx as the
+reverse proxy, the FastAPI app container, and Supabase PostgreSQL as the persistent database.
+
+Create `.env-prod` from `.env-prod.example` on the Raspberry Pi and fill in the Supabase database
+connection values. Do not commit `.env-prod`.
+
+Run database migrations for the configured environment:
+
+```sh
+uv run poe migrate
+```
+
+Run production migrations through the app container:
+
+```sh
+uv run poe migrate-prod
+```
+
+Pull the production image, migrate the Supabase database, and start the production stack:
+
+```sh
+uv run poe setup-app
+```
+
+The production stack serves the backend through Nginx at `/backend`. Keep the Raspberry Pi behind
+your router firewall and do not configure public port forwarding if the app should remain private.
+
+Tailscale is optional. It is a private WireGuard-based VPN that lets your own devices reach the Pi
+securely from outside your home network without exposing the app to the public internet.
+
 ## Notes
 
 Within the Dev Container this is equivalent to:

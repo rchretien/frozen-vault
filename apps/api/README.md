@@ -84,7 +84,12 @@ psql -h localhost -U postgres -d fridge_inventory_dev
 ENVIRONMENT=dev uv run uvicorn fridge_app_backend.api.app:app --reload
 
 ```
-The API will connect to the PostgreSQL database using the .env-dev configuration. Alembic will run the migration at api start up.
+The API will connect to the PostgreSQL database using the .env-dev configuration. Run migrations
+explicitly before starting the API:
+
+```sh
+ENVIRONMENT=dev uv run poe migrate
+```
 
 ### 5. Stop the database when finished
 ```

@@ -177,6 +177,10 @@ type = "simple"
     name = "dev"
     options = ["--dev"]
 
+  [tool.poe.tasks.migrate]
+  help = "Run database migrations"
+  cmd = "alembic upgrade head"
+
   [tool.poe.tasks.lint]
   help = "Lint this app"
   cmd = """

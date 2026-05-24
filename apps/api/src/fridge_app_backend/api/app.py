@@ -62,6 +62,7 @@ app = FastAPI(
     description=config.api_description,
     started=datetime.now(tz=config.brussels_tz),
     version=config.api_version,
+    root_path=config.api_root_path,
     lifespan=lifespan,
 )
 

@@ -35,6 +35,7 @@ class Config(BaseSettings):
     api_name: str = "FrozenVault Backend"
     api_description: str = "CRUD API for managing the FrozenVault inventory."
     api_version: str = "0.1.0"
+    api_root_path: str = ""
     brussels_tz_name: str = "Europe/Brussels"
     commit_sha: str | None = None
 

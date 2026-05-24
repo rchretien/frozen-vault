@@ -61,6 +61,35 @@ type = "simple"
     name = "serve"
     options = ["--serve"]
 
+  [tool.poe.tasks.migrate]
+  help = "Run backend database migrations using the current environment"
+  cmd = "uv run --directory apps/api poe migrate"
+
+  [tool.poe.tasks.migrate-prod]
+  help = "Run production database migrations in the app container"
+  shell = """
+    test -f .env-prod || {
+      printf '%s\n' "Missing .env-prod. Create it from .env-prod.example before deploying."
+      exit 1
+    }
+
+    docker compose --env-file .env-prod -f docker-compose-prod.yml run --rm api migrate
+    """
+
+  [tool.poe.tasks.setup-app]
+  help = "Pull, migrate, and start the Raspberry Pi production stack"
+  shell = """
+    test -f .env-prod || {
+      printf '%s\n' "Missing .env-prod. Create it from .env-prod.example before deploying."
+      exit 1
+    }
+
+    docker compose --env-file .env-prod -f docker-compose-prod.yml pull
+    docker compose --env-file .env-prod -f docker-compose-prod.yml run --rm api migrate
+    docker compose --env-file .env-prod -f docker-compose-prod.yml up -d --remove-orphans
+    docker compose --env-file .env-prod -f docker-compose-prod.yml ps
+    """
+
   [tool.poe.tasks.lint]
   help = "Lint the backend app"
   cmd = "uv run --directory apps/api poe lint"
