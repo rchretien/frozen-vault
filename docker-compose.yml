@@ -1,7 +1,7 @@
 services:
 
   postgres:
-    image: postgres:16-alpine
+    image: postgres:18-alpine
     container_name: fridge-app-postgres
     env_file:
       - path: .env-dev
@@ -11,7 +11,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-fridge_dev}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER:-fridge_dev}" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -34,7 +34,7 @@ services:
         condition: service_healthy
     profiles:
       - dev
-    command: ["api", "--dev", "--host", "0.0.0.0", "--port", "8000"]
+    command: [ "api", "--dev", "--host", "0.0.0.0", "--port", "8000" ]
 
   devcontainer:
     image: fridge-app-devcontainer
