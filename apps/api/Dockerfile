@@ -12,8 +12,8 @@ RUN git config --system --add safe.directory '*'
 
 # Create a non-root user and give it passwordless sudo access [1].
 # [1] https://code.visualstudio.com/remote/advancedcontainers/add-nonroot-user
-RUN --mount=type=cache,target=/var/cache/apt/ \
-    --mount=type=cache,target=/var/lib/apt/ \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
     groupadd --gid 1000 user && \
     useradd --create-home --no-log-init --gid 1000 --uid 1000 --shell /usr/bin/bash user && \
     chown user:user /opt/ && \
@@ -40,8 +40,8 @@ ENV PYTHONUNBUFFERED=1
 RUN rm /etc/apt/apt.conf.d/docker-clean
 
 # Install compilers that may be required for certain packages or platforms.
-RUN --mount=type=cache,target=/var/cache/apt/ \
-    --mount=type=cache,target=/var/lib/apt/ \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt-get update && \
     apt-get install --no-install-recommends --yes build-essential
 
