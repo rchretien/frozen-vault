@@ -177,6 +177,26 @@ type = "simple"
     name = "dev"
     options = ["--dev"]
 
+  [tool.poe.tasks.api-prod]
+  help = "Run migrations, then serve the production REST API"
+  shell = """
+    set -e
+    alembic upgrade head
+    poe api --host $host --port $port
+    """
+
+    [[tool.poe.tasks.api-prod.args]]
+    help = "Bind socket to this host (default: 0.0.0.0)"
+    name = "host"
+    options = ["--host"]
+    default = "0.0.0.0"
+
+    [[tool.poe.tasks.api-prod.args]]
+    help = "Bind socket to this port (default: 8000)"
+    name = "port"
+    options = ["--port"]
+    default = "8000"
+
   [tool.poe.tasks.migrate]
   help = "Run database migrations"
   cmd = "alembic upgrade head"

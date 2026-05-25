@@ -8,6 +8,72 @@ on:
   pull_request:
 
 jobs:
+  migration-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: fridge_test
+          POSTGRES_PASSWORD: fridge_test
+          POSTGRES_DB: fridge_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fridge_test -d fridge_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      ENVIRONMENT: test
+      DB_TYPE: postgres
+      DB_USER: fridge_test
+      DB_PASSWORD: fridge_test
+      DB_NAME: fridge_test
+      DB_HOST: localhost
+      DB_PORT: "5432"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Run migrations
+        run: uv run --directory apps/api poe migrate
+
+      - name: Verify migrated schema
+        run: |
+          uv run --directory apps/api python - <<'PY'
+          from sqlalchemy import create_engine, inspect, text
+
+          from fridge_app_backend.config import config
+
+          engine = create_engine(config.db_url)
+          with engine.connect() as connection:
+              inspector = inspect(connection)
+              tables = set(inspector.get_table_names())
+              required_tables = {
+                  "alembic_version",
+                  "product",
+                  "product_type",
+                  "product_location",
+              }
+              missing_tables = required_tables - tables
+              if missing_tables:
+                  raise SystemExit(f"Missing tables after migration: {sorted(missing_tables)}")
+
+              product_type_count = connection.scalar(text("select count(*) from product_type"))
+              product_location_count = connection.scalar(
+                  text("select count(*) from product_location")
+              )
+              if not product_type_count or not product_location_count:
+                  raise SystemExit("Missing seed rows after migration")
+          PY
+
   test:
     runs-on: ubuntu-latest
 

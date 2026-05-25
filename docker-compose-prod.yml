@@ -20,7 +20,7 @@ services:
       - .env-prod
     environment:
       API_ROOT_PATH: /backend
-    command: ["api", "--host", "0.0.0.0", "--port", "8000"]
+    command: ["api-prod", "--host", "0.0.0.0", "--port", "8000"]
     restart: unless-stopped
     healthcheck:
       test:
