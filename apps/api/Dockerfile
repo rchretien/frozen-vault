@@ -35,6 +35,9 @@ FROM python:3.13-slim AS app
 # [2] https://docs.python.org/3/using/cmdline.html#envvar-PYTHONUNBUFFERED
 ENV PYTHONFAULTHANDLER=1
 ENV PYTHONUNBUFFERED=1
+ENV VIRTUAL_ENV=/workspace/app/.venv
+ENV PATH=$VIRTUAL_ENV/bin:$PATH
+ENV UV_PROJECT_ENVIRONMENT=$VIRTUAL_ENV
 
 # Remove docker-clean so we can manage the apt cache with the Docker build cache.
 RUN rm /etc/apt/apt.conf.d/docker-clean
@@ -71,5 +74,5 @@ RUN --mount=type=cache,uid=1000,gid=1000,target=/home/user/.cache/uv \
     --python-preference only-system
 
 # Expose the app.
-ENTRYPOINT ["/workspace/app/apps/api/.venv/bin/poe"]
+ENTRYPOINT ["/workspace/app/.venv/bin/poe"]
 CMD ["api"]
