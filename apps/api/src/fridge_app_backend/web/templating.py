@@ -4,6 +4,7 @@ from datetime import date, datetime, timedelta
 from typing import Any
 
 from fastapi.templating import Jinja2Templates
+from starlette.requests import Request
 
 from fridge_app_backend.config import ROOT_DIR, config
 
@@ -89,6 +90,11 @@ def product_unit_label(value: Any) -> str:
     return str(getattr(value, "value", value))
 
 
+def url_path_for(request: Request, route_name: str, **path_params: object) -> str:
+    """Return a local route URL as a path-only value for proxy-safe HTML."""
+    return request.url_for(route_name, **path_params).path
+
+
 templates = Jinja2Templates(directory=str(TEMPLATE_DIR))
 templates.env.globals.update(
     config=config,
@@ -100,4 +106,5 @@ templates.env.globals.update(
     product_type_visual=product_type_visual,
     product_location_label=product_location_label,
     product_unit_label=product_unit_label,
+    url_path_for=url_path_for,
 )

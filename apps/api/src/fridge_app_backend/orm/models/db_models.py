@@ -2,7 +2,8 @@
 
 from datetime import datetime
 
-from sqlalchemy import CheckConstraint, DateTime, Enum, ForeignKey, Integer, String
+from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Enum as SQLAlchemyEnum
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, relationship
 
 from fridge_app_backend.orm.enums.base_enums import (
@@ -10,6 +11,11 @@ from fridge_app_backend.orm.enums.base_enums import (
     ProductTypeEnum,
     ProductUnitEnum,
 )
+
+
+def enum_values(enum_cls):
+    """Persist enum values instead of member names."""
+    return [item.value for item in enum_cls]
 
 
 class Base(DeclarativeBase):
@@ -31,7 +37,7 @@ class ProductType(BaseWithID):
     __tablename__ = "product_type"
 
     name: Mapped[ProductTypeEnum] = mapped_column(
-        Enum(ProductTypeEnum), unique=True, nullable=False
+        SQLAlchemyEnum(ProductTypeEnum, values_callable=enum_values), unique=True, nullable=False
     )
 
     # Relationship with the Product model (one-to-many)
@@ -43,7 +49,9 @@ class ProductLocation(BaseWithID):
 
     __tablename__ = "product_location"
 
-    name: Mapped[ProductLocationEnum] = mapped_column(Enum(ProductLocationEnum), unique=True)
+    name: Mapped[ProductLocationEnum] = mapped_column(
+        SQLAlchemyEnum(ProductLocationEnum, values_callable=enum_values), unique=True
+    )
 
     # Relationship with the Product model (one-to-many)
     products: Mapped[list["Product"]] = relationship("Product", back_populates="product_location")
@@ -59,7 +67,9 @@ class Product(BaseWithID):
     description: Mapped[str] = mapped_column(String)
     quantity: Mapped[int] = mapped_column(Integer, CheckConstraint("quantity >= 1"))
     unit: Mapped[ProductUnitEnum] = mapped_column(
-        Enum(ProductUnitEnum), default=ProductUnitEnum.GRAM, nullable=False
+        SQLAlchemyEnum(ProductUnitEnum, values_callable=enum_values),
+        default=ProductUnitEnum.GRAM,
+        nullable=False,
     )
     creation_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     expiry_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)

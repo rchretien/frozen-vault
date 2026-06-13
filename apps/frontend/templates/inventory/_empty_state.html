@@ -41,14 +41,14 @@
     {% endif %}
   </p>
   <div class="empty-state-actions">
-    <a class="primary-button" href="{{ request.url_for('new_product_page') }}">
+    <a class="primary-button" href="{{ url_path_for(request, 'new_product_page') }}">
       {% set icon_name = 'plus' %}
       {% set icon_class = 'app-icon app-icon-sm' %}
       {% include 'partials/_heroicon.html' %}
       <span>Add product</span>
     </a>
     {% if filters.q or filters.product_type or filters.product_location or filters.sort != 'newest' %}
-      <a class="secondary-button" href="{{ request.url_for('inventory_home') if active_nav == 'inventory' else request.url_for('inventory_soon') }}">
+      <a class="secondary-button" href="{{ url_path_for(request, 'inventory_home') if active_nav == 'inventory' else url_path_for(request, 'inventory_soon') }}">
         {% set icon_name = 'arrow-path' %}
         {% set icon_class = 'app-icon app-icon-sm' %}
         {% include 'partials/_heroicon.html' %}

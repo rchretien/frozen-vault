@@ -11,13 +11,13 @@
         <p class="hero-copy">Check what is expiring, jump into the full inventory grid, and add products without landing straight in the management view.</p>
 
         <div class="home-action-row">
-          <a class="primary-button" href="{{ request.url_for('new_product_page') }}">
+          <a class="primary-button" href="{{ url_path_for(request, 'new_product_page') }}">
             {% set icon_name = 'plus' %}
             {% set icon_class = 'app-icon app-icon-sm' %}
             {% include 'partials/_heroicon.html' %}
             <span>Add product</span>
           </a>
-          <a class="secondary-button" href="{{ request.url_for('inventory_home') }}">
+          <a class="secondary-button" href="{{ url_path_for(request, 'inventory_home') }}">
             <span>Open inventory</span>
           </a>
         </div>
@@ -52,21 +52,21 @@
       </div>
 
       <div class="home-shortcut-grid">
-        <a class="home-shortcut-card" href="{{ request.url_for('inventory_home') }}">
+        <a class="home-shortcut-card" href="{{ url_path_for(request, 'inventory_home') }}">
           {% set icon_name = 'squares-2x2' %}
           {% set icon_class = 'app-icon app-icon-md' %}
           {% include 'partials/_heroicon.html' %}
           <strong>Inventory grid</strong>
           <p class="muted-text">Full table view for sorting, scanning, and managing products.</p>
         </a>
-        <a class="home-shortcut-card" href="{{ request.url_for('inventory_soon') }}">
+        <a class="home-shortcut-card" href="{{ url_path_for(request, 'inventory_soon') }}">
           {% set icon_name = 'clock' %}
           {% set icon_class = 'app-icon app-icon-md' %}
           {% include 'partials/_heroicon.html' %}
           <strong>Expiring soon</strong>
           <p class="muted-text">Focus only on items that need to be used in the next few days.</p>
         </a>
-        <a class="home-shortcut-card" href="{{ request.url_for('new_product_page') }}">
+        <a class="home-shortcut-card" href="{{ url_path_for(request, 'new_product_page') }}">
           {% set icon_name = 'plus' %}
           {% set icon_class = 'app-icon app-icon-md' %}
           {% include 'partials/_heroicon.html' %}
@@ -83,7 +83,7 @@
             <p class="eyebrow">Urgent first</p>
             <h3 class="section-title">What needs action</h3>
           </div>
-          <a class="utility-link" href="{{ request.url_for('inventory_soon') }}">
+          <a class="utility-link" href="{{ url_path_for(request, 'inventory_soon') }}">
             {% set icon_name = 'clock' %}
             {% set icon_class = 'app-icon app-icon-sm' %}
             {% include 'partials/_heroicon.html' %}
@@ -96,7 +96,7 @@
             {% for product in urgent_preview %}
               {% set type_visual = product_type_visual(product.product_type) %}
               {% set product_status = expiry_status(product.expiry_date) %}
-              <a class="home-list-row tone-{{ type_visual.tone }}" href="{{ request.url_for('edit_product_page', product_id=product.id) }}?return_to=/">
+              <a class="home-list-row tone-{{ type_visual.tone }}" href="{{ url_path_for(request, 'edit_product_page', product_id=product.id) }}?return_to=/">
                 <span class="product-card-icon home-list-icon" aria-hidden="true">
                   {% include 'partials/_product_type_icon.html' %}
                 </span>
@@ -127,7 +127,7 @@
             <p class="eyebrow">Latest items</p>
             <h3 class="section-title">Recently tracked</h3>
           </div>
-          <a class="utility-link" href="{{ request.url_for('inventory_home') }}">
+          <a class="utility-link" href="{{ url_path_for(request, 'inventory_home') }}">
             <span>Open inventory</span>
           </a>
         </div>
@@ -136,7 +136,7 @@
           <div class="home-list">
             {% for product in recent_preview %}
               {% set type_visual = product_type_visual(product.product_type) %}
-              <a class="home-list-row tone-{{ type_visual.tone }}" href="{{ request.url_for('edit_product_page', product_id=product.id) }}?return_to=/">
+              <a class="home-list-row tone-{{ type_visual.tone }}" href="{{ url_path_for(request, 'edit_product_page', product_id=product.id) }}?return_to=/">
                 <span class="product-card-icon home-list-icon" aria-hidden="true">
                   {% include 'partials/_product_type_icon.html' %}
                 </span>

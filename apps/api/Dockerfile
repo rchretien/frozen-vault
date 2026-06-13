@@ -37,6 +37,7 @@ ENV PYTHONFAULTHANDLER=1
 ENV PYTHONUNBUFFERED=1
 ENV VIRTUAL_ENV=/workspace/app/.venv
 ENV PATH=$VIRTUAL_ENV/bin:$PATH
+ENV PYTHONPATH=/workspace/app/apps/api/src
 ENV UV_PROJECT_ENVIRONMENT=$VIRTUAL_ENV
 
 # Remove docker-clean so we can manage the apt cache with the Docker build cache.

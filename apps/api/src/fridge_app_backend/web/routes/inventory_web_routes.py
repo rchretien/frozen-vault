@@ -93,10 +93,22 @@ def _safe_return_to(return_to: str | None, *, fallback: str = "/") -> str:
     return fallback
 
 
-def _with_query_params(base_url: str, **params: str) -> str:
+def _with_query_params(base_url: str, **params: Any) -> str:
     """Append query parameters to a relative URL."""
     separator = "&" if "?" in base_url else "?"
     return f"{base_url}{separator}{urlencode(params)}"
+
+
+def _url_path_for(request: Request, route_name: str, **path_params: Any) -> str:
+    """Return a named route URL as a path-only value."""
+    return request.url_for(route_name, **path_params).path
+
+
+def _url_path_with_query(
+    request: Request, route_name: str, *, query_params: dict[str, Any], **path_params: Any
+) -> str:
+    """Return a named route path with query parameters."""
+    return _with_query_params(_url_path_for(request, route_name, **path_params), **query_params)
 
 
 def _redirect_with_flash(
@@ -204,10 +216,10 @@ def _get_inventory_context(
     ).total
     load_more_url = None
     if has_more:
-        load_more_url = str(
-            request.url_for("render_inventory_list_fragment").include_query_params(
-                **_list_query_params(filters, limit=filters["limit"] + LIMIT_STEP)
-            )
+        load_more_url = _url_path_with_query(
+            request,
+            "render_inventory_list_fragment",
+            query_params=_list_query_params(filters, limit=filters["limit"] + LIMIT_STEP),
         )
 
     current_url = _current_path_with_query(request)
@@ -215,9 +227,9 @@ def _get_inventory_context(
     all_params = {**filter_params, "urgency": "all"}
     soon_params = {**filter_params, "urgency": "soon"}
     expired_params = {**filter_params, "urgency": "expired"}
-    all_url = str(request.url_for("inventory_home").include_query_params(**all_params))
-    soon_url = str(request.url_for("inventory_soon").include_query_params(**soon_params))
-    expired_url = str(request.url_for("inventory_soon").include_query_params(**expired_params))
+    all_url = _url_path_with_query(request, "inventory_home", query_params=all_params)
+    soon_url = _url_path_with_query(request, "inventory_soon", query_params=soon_params)
+    expired_url = _url_path_with_query(request, "inventory_soon", query_params=expired_params)
 
     return {
         "request": request,
@@ -232,8 +244,8 @@ def _get_inventory_context(
         "load_more_url": load_more_url,
         "current_url": current_url,
         "filter_urls": {"all": all_url, "soon": soon_url, "expired": expired_url},
-        "filter_action_url": str(
-            request.url_for("inventory_soon" if active_nav == "soon" else "inventory_home")
+        "filter_action_url": _url_path_for(
+            request, "inventory_soon" if active_nav == "soon" else "inventory_home"
         ),
         "sort_options": [
             ("newest", "Newest first"),
@@ -535,7 +547,7 @@ async def new_product_page(request: Request, return_to: str = Query(default="/")
         request=request,
         title="Add product",
         submit_label="Create product",
-        action_url=str(request.url_for("create_product_page")),
+        action_url=_url_path_for(request, "create_product_page"),
         form_data=_empty_form_data(),
         active_nav="add",
         return_to=return_to,
@@ -575,7 +587,7 @@ async def create_product_page(
             request=request,
             title="Add product",
             submit_label="Create product",
-            action_url=str(request.url_for("create_product_page")),
+            action_url=_url_path_for(request, "create_product_page"),
             form_data=form_data,
             errors=missing_errors,
             active_nav="add",
@@ -595,7 +607,7 @@ async def create_product_page(
             request=request,
             title="Add product",
             submit_label="Create product",
-            action_url=str(request.url_for("create_product_page")),
+            action_url=_url_path_for(request, "create_product_page"),
             form_data=form_data,
             errors=errors,
             active_nav="add",
@@ -609,7 +621,7 @@ async def create_product_page(
             request=request,
             title="Add product",
             submit_label="Create product",
-            action_url=str(request.url_for("create_product_page")),
+            action_url=_url_path_for(request, "create_product_page"),
             form_data=form_data,
             errors={"__all__": str(exc)},
             active_nav="add",
@@ -640,7 +652,7 @@ async def edit_product_page(
         request=request,
         title=f"Edit {product_view.product_name}",
         submit_label="Save changes",
-        action_url=str(request.url_for("update_product_page", product_id=product_id)),
+        action_url=_url_path_for(request, "update_product_page", product_id=product_id),
         form_data=form_data,
         active_nav="add",
         return_to=return_to,
@@ -689,7 +701,7 @@ async def update_product_page(
             request=request,
             title=f"Edit {form_data['product_name'] or product.name}",
             submit_label="Save changes",
-            action_url=str(request.url_for("update_product_page", product_id=product_id)),
+            action_url=_url_path_for(request, "update_product_page", product_id=product_id),
             form_data=form_data,
             errors=missing_errors,
             active_nav="add",
@@ -709,7 +721,7 @@ async def update_product_page(
             request=request,
             title=f"Edit {product.name}",
             submit_label="Save changes",
-            action_url=str(request.url_for("update_product_page", product_id=product_id)),
+            action_url=_url_path_for(request, "update_product_page", product_id=product_id),
             form_data=form_data,
             errors=errors,
             active_nav="add",
@@ -723,7 +735,7 @@ async def update_product_page(
             request=request,
             title=f"Edit {form_data['product_name']}",
             submit_label="Save changes",
-            action_url=str(request.url_for("update_product_page", product_id=product_id)),
+            action_url=_url_path_for(request, "update_product_page", product_id=product_id),
             form_data=form_data,
             errors={"__all__": str(exc)},
             active_nav="add",
