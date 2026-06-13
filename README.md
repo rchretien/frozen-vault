@@ -60,10 +60,17 @@ Run production migrations through the app container:
 uv run poe migrate-prod
 ```
 
-Pull the production image, migrate the Supabase database, and start the production stack:
+Pull the production image and start the production stack. The API container runs migrations on
+startup through its production command.
 
 ```sh
-uv run poe setup-app
+./scripts/pi-deploy.sh
+```
+
+Run a quick post-deploy check for the HTTPS proxy, static assets, and mixed-content URLs:
+
+```sh
+./scripts/pi-check.sh
 ```
 
 The production stack serves the backend through Nginx at `/backend`. Keep the Raspberry Pi behind
