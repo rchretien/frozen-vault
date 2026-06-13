@@ -78,6 +78,16 @@ def test_home_page_renders_welcome_dashboard(client: TestClient) -> None:
     assert "Home" in response.text
 
 
+def test_home_page_uses_path_only_local_urls(client: TestClient) -> None:
+    """Local assets and links should not emit absolute HTTP URLs behind HTTPS proxies."""
+    response = client.get("/")
+
+    assert response.status_code == httpx.codes.OK
+    assert 'href="/static/css/app.css' in response.text
+    assert 'src="/static/js/app.js"' in response.text
+    assert "http://testserver" not in response.text
+
+
 def test_home_page_shows_urgent_items_outside_recent_preview(client: TestClient) -> None:
     """The dashboard urgent list should not be limited to the newest products."""
     _create_product_through_api_with_expiry(client, "Old urgent cream", 1)

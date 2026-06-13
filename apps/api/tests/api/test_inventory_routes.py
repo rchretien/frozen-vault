@@ -5,7 +5,7 @@ from typing import Any
 
 import httpx
 from fastapi.testclient import TestClient
-from sqlalchemy import delete
+from sqlalchemy import delete, text
 
 from fridge_app_backend.config import config
 from fridge_app_backend.orm.database import SessionLocal
@@ -64,6 +64,18 @@ def test_create_product_and_list(client: TestClient) -> None:
     assert product["unit"] == payload["unit"]
     assert product["quantity"] == payload["quantity"]
     assert product["image_location"] == "file_path"
+
+
+def test_create_product_persists_unit_value(client: TestClient) -> None:
+    """Persist unit values using the same strings allowed by the DB constraint."""
+    payload = _product_payload(unit=ProductUnitEnum.BOXES.value)
+
+    create_response = client.post("/inventory/create", json=payload)
+
+    assert create_response.status_code == httpx.codes.CREATED
+    with SessionLocal() as session:
+        raw_unit = session.execute(text("select unit from product")).scalar_one()
+    assert raw_unit == ProductUnitEnum.BOXES.value
 
 
 def test_get_names_starting_with_returns_sentence_case(client: TestClient) -> None:

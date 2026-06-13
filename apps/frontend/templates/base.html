@@ -7,16 +7,16 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,650;9..144,750&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ request.url_for('static', path='css/app.css') }}?v={{ config.commit_sha }}">
+    <link rel="stylesheet" href="{{ url_path_for(request, 'static', path='css/app.css') }}?v={{ config.commit_sha }}">
     <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
-    <script src="{{ request.url_for('static', path='js/app.js') }}" defer></script>
+    <script src="{{ url_path_for(request, 'static', path='js/app.js') }}" defer></script>
   </head>
   <body class="app-body">
     <div class="app-frame">
       <div class="app-shell">
         <header class="app-header">
           <div class="header-brand" style="padding-left: 1rem;">
-            <a class="brand-home-link" href="{{ request.url_for('home_page') }}">
+            <a class="brand-home-link" href="{{ url_path_for(request, 'home_page') }}">
               <div class="brand-lockup">
                 {% include 'partials/_brand_mark.html' %}
                 <div>
@@ -28,28 +28,28 @@
             </a>
           </div>
           {% if active_nav == 'home' %}
-            <a class="header-action" style="margin-right: 1rem;" href="{{ request.url_for('new_product_page') }}{% if current_url is defined %}?return_to={{ current_url | urlencode }}{% endif %}">
+            <a class="header-action" style="margin-right: 1rem;" href="{{ url_path_for(request, 'new_product_page') }}{% if current_url is defined %}?return_to={{ current_url | urlencode }}{% endif %}">
               {% set icon_name = 'plus' %}
               {% set icon_class = 'app-icon app-icon-sm' %}
               {% include 'partials/_heroicon.html' %}
               <span>Add</span>
             </a>
           {% elif active_nav == 'inventory' %}
-            <a class="header-action" style="margin-right: 1rem;" href="{{ request.url_for('new_product_page') }}{% if current_url is defined %}?return_to={{ current_url | urlencode }}{% endif %}">
+            <a class="header-action" style="margin-right: 1rem;" href="{{ url_path_for(request, 'new_product_page') }}{% if current_url is defined %}?return_to={{ current_url | urlencode }}{% endif %}">
               {% set icon_name = 'plus' %}
               {% set icon_class = 'app-icon app-icon-sm' %}
               {% include 'partials/_heroicon.html' %}
               <span>Add</span>
             </a>
           {% elif active_nav == 'soon' %}
-            <a class="header-action" style="margin-right: 1rem;" href="{{ request.url_for('inventory_home') }}">
+            <a class="header-action" style="margin-right: 1rem;" href="{{ url_path_for(request, 'inventory_home') }}">
               {% set icon_name = 'squares-2x2' %}
               {% set icon_class = 'app-icon app-icon-sm' %}
               {% include 'partials/_heroicon.html' %}
               <span>Inventory</span>
             </a>
           {% else %}
-            <a class="header-action" style="margin-right: 1rem;" href="{{ request.url_for('home_page') }}">
+            <a class="header-action" style="margin-right: 1rem;" href="{{ url_path_for(request, 'home_page') }}">
               {% set icon_name = 'home' %}
               {% set icon_class = 'app-icon app-icon-sm' %}
               {% include 'partials/_heroicon.html' %}

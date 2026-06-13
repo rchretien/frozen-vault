@@ -17,7 +17,7 @@
           value="{{ filters.q }}"
           placeholder="Start typing a product name…"
           autocomplete="off"
-          hx-get="{{ request.url_for('render_inventory_list_fragment') }}"
+          hx-get="{{ url_path_for(request, 'render_inventory_list_fragment') }}"
           hx-trigger="keyup changed delay:300ms, search"
           hx-target="#inventory-results"
           hx-swap="outerHTML"
@@ -46,7 +46,7 @@
           <span>Sort</span>
           <select
             name="sort"
-            hx-get="{{ request.url_for('render_inventory_list_fragment') }}"
+            hx-get="{{ url_path_for(request, 'render_inventory_list_fragment') }}"
             hx-trigger="change"
             hx-target="#inventory-results"
             hx-swap="outerHTML"
@@ -63,7 +63,7 @@
           <span>Type</span>
           <select
             name="product_type"
-            hx-get="{{ request.url_for('render_inventory_list_fragment') }}"
+            hx-get="{{ url_path_for(request, 'render_inventory_list_fragment') }}"
             hx-trigger="change"
             hx-target="#inventory-results"
             hx-swap="outerHTML"
@@ -81,7 +81,7 @@
           <span>Location</span>
           <select
             name="product_location"
-            hx-get="{{ request.url_for('render_inventory_list_fragment') }}"
+            hx-get="{{ url_path_for(request, 'render_inventory_list_fragment') }}"
             hx-trigger="change"
             hx-target="#inventory-results"
             hx-swap="outerHTML"
@@ -102,7 +102,7 @@
     
     {% if filters.q or filters.product_type or filters.product_location or filters.sort != 'newest' %}
       <div class="toolbar-actions toolbar-actions-compact">
-        <a class="utility-link" href="{{ request.url_for('inventory_home') if active_nav == 'inventory' else request.url_for('inventory_soon') }}">
+        <a class="utility-link" href="{{ url_path_for(request, 'inventory_home') if active_nav == 'inventory' else url_path_for(request, 'inventory_soon') }}">
           {% set icon_name = 'arrow-path' %}
           {% set icon_class = 'app-icon app-icon-sm' %}
           {% include 'partials/_heroicon.html' %}
