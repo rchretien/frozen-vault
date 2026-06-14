@@ -15,13 +15,16 @@ services:
     restart: unless-stopped
 
   api:
-    image: ghcr.io/rchretien/fridge-app:latest
+    image: ${IMAGE_REF:-ghcr.io/rchretien/fridge-app:latest}
     container_name: fridge-app-api
     env_file:
       - .env-prod
     environment:
-      API_ROOT_PATH: /backend
+      API_ROOT_PATH: /fridge-app
+      DEPLOYED_AT: ${DEPLOYED_AT:-unknown}
       FORWARDED_ALLOW_IPS: "*"
+      IMAGE_DIGEST: ${IMAGE_DIGEST:-unknown}
+      IMAGE_REF: ${IMAGE_REF:-ghcr.io/rchretien/fridge-app:latest}
       PYTHONPATH: /workspace/app/apps/api/src
     entrypoint: [ "/workspace/app/.venv/bin/poe" ]
     command: [ "api-prod", "--host", "0.0.0.0", "--port", "8000" ]

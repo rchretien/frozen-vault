@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from typing import Any
 
 import httpx
+import pytest
 from fastapi.testclient import TestClient
 
 from fridge_app_backend.config import config
@@ -201,7 +202,32 @@ def test_more_page_renders_utility_screen(client: TestClient) -> None:
 
     assert response.status_code == httpx.codes.OK
     assert "Tools" in response.text
+    assert "Runtime status" in response.text
+    assert 'href="/web/more/deployment"' in response.text
     assert "API documentation" in response.text
+    assert 'href="/docs"' in response.text
+    assert "Runtime index" not in response.text
+    assert "Open JSON status" not in response.text
+
+
+def test_deployment_status_page_renders_values(
+    monkeypatch: pytest.MonkeyPatch, client: TestClient
+) -> None:
+    """The runtime status tool should show deployment values after opening it."""
+    monkeypatch.setenv("IMAGE_REF", "ghcr.io/rchretien/fridge-app:latest")
+    monkeypatch.setenv("IMAGE_DIGEST", "ghcr.io/rchretien/fridge-app@sha256:test")
+    monkeypatch.setenv("DEPLOYED_AT", "2026-06-14T12:00:00Z")
+
+    response = client.get("/web/more/deployment")
+
+    assert response.status_code == httpx.codes.OK
+    assert "Runtime index" in response.text
+    assert "Image" in response.text
+    assert "ghcr.io/rchretien/fridge-app:latest" in response.text
+    assert "ghcr.io/rchretien/fridge-app@sha256:test" in response.text
+    assert "2026-06-14T12:00:00Z" in response.text
+    assert 'href="/utils/deployment"' in response.text
+    assert 'href="/web/more"' in response.text
 
 
 def test_new_product_page_renders_form(client: TestClient) -> None:

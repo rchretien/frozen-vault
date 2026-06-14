@@ -73,7 +73,7 @@ Run a quick post-deploy check for the HTTPS proxy, static assets, and mixed-cont
 ./scripts/pi-check.sh
 ```
 
-The production stack serves the backend through Nginx at `/backend`. Keep the Raspberry Pi behind
+The production stack serves the app through Nginx at `/fridge-app`. Keep the Raspberry Pi behind
 your router firewall and do not configure public port forwarding if the app should remain private.
 
 Tailscale is optional. It is a private WireGuard-based VPN that lets your own devices reach the Pi

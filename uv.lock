@@ -485,7 +485,7 @@ dependencies = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "poethepoet", specifier = ">=0.32.1" }]
+requires-dist = [{ name = "poethepoet", specifier = ">=0.46.0" }]
 
 [[package]]
 name = "ghp-import"
@@ -1100,15 +1100,15 @@ wheels = [
 
 [[package]]
 name = "poethepoet"
-version = "0.43.0"
+version = "0.46.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pastel" },
     { name = "pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/91/4a/3cdfd054e4e81913028d8c399d04e51a8c2431110d5797e302206d350ffa/poethepoet-0.43.0.tar.gz", hash = "sha256:62b058ef92ca76fc758dd6362918f5054b9f519fa5328e2eeaa00c72bdc90e85", size = 95454, upload-time = "2026-04-03T10:56:26.299Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/3b/f5/d501fcb67e450fd3fae9db06050420c0c6043758cfa8c30ba40278211265/poethepoet-0.46.0.tar.gz", hash = "sha256:daf8469031879ef59ef0b34fdba83574d65e41eb9186e20cd0f7c89ce479b030", size = 117276, upload-time = "2026-05-15T15:52:02.548Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e0/6f/23f86e5abfb3308ef1fa749571ba06d86e437d355862356ff8e3dfd66b05/poethepoet-0.43.0-py3-none-any.whl", hash = "sha256:c12f8be41dbecee8abac4266bda4b04060b7129d2868edf50823e6509c249431", size = 122290, upload-time = "2026-04-03T10:56:24.645Z" },
+    { url = "https://files.pythonhosted.org/packages/af/01/a9d6ea30351919298d3dc237172ae6a60ce0224ecaaee289b671ab979c13/poethepoet-0.46.0-py3-none-any.whl", hash = "sha256:dc6d770a14792d124abac9066c5a707876027d1878ac9ca26cf57e9b2a96dc89", size = 150581, upload-time = "2026-05-15T15:52:01.118Z" },
 ]
 
 [[package]]

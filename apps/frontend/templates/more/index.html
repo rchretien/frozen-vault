@@ -10,7 +10,17 @@
         <h2 class="section-title">Tools</h2>
       </div>
 
-      <a class="utility-row" href="/docs">
+      <a class="utility-row" href="{{ url_path_for(request, 'deployment_status_page') }}">
+        <div>
+          <strong>Runtime status</strong>
+          <p class="muted-text">View deployment metadata for this app instance.</p>
+        </div>
+        {% set icon_name = 'circle-stack' %}
+        {% set icon_class = 'row-chevron' %}
+        {% include 'partials/_heroicon.html' %}
+      </a>
+
+      <a class="utility-row" href="{{ request.scope.get('root_path', '') }}/docs">
         <div>
           <strong>API documentation</strong>
           <p class="muted-text">Open the backend API reference.</p>

@@ -10,6 +10,7 @@ from pydantic import ValidationError
 from starlette.status import HTTP_303_SEE_OTHER, HTTP_404_NOT_FOUND
 
 from fridge_app_backend.api.dependencies.product_dependencies import SessionDependency
+from fridge_app_backend.api.deployment_info import get_deployment_info
 from fridge_app_backend.config import config
 from fridge_app_backend.exceptions import (
     InvalidExpiryDateError,
@@ -340,6 +341,20 @@ def _render_more_page(request: Request) -> HTMLResponse:
     )
 
 
+def _render_deployment_status_page(request: Request) -> HTMLResponse:
+    """Render the deployment status utility page."""
+    return templates.TemplateResponse(
+        request=request,
+        name="more/deployment.html",
+        context={
+            "active_nav": "more",
+            "screen_title": "Runtime status",
+            "screen_subtitle": "Deployment and runtime metadata for this fridge app instance.",
+            "deployment_info": get_deployment_info(request),
+        },
+    )
+
+
 def _get_home_context(*, request: Request, session: SessionDependency) -> dict[str, Any]:
     """Build the dedicated welcome dashboard context."""
     context = _get_inventory_context(
@@ -508,6 +523,12 @@ async def inventory_soon(
 async def more_page(request: Request) -> HTMLResponse:
     """Render the utility and future-tools screen."""
     return _render_more_page(request)
+
+
+@inventory_web_router.get("/web/more/deployment", response_class=HTMLResponse)
+async def deployment_status_page(request: Request) -> HTMLResponse:
+    """Render deployment metadata from the Tools screen."""
+    return _render_deployment_status_page(request)
 
 
 @inventory_web_router.get(

@@ -1556,6 +1556,37 @@ dd {
   opacity: 0.8;
 }
 
+.runtime-index-list {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.85rem;
+}
+
+.runtime-index-item {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, rgba(18, 26, 32, 0.98), rgba(11, 16, 20, 0.97));
+}
+
+.runtime-index-item dt {
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.runtime-index-item dd {
+  color: var(--text);
+  font-size: 0.92rem;
+  overflow-wrap: anywhere;
+}
+
+.runtime-index-link {
+  margin-top: 0.85rem;
+}
+
 .utility-row-meta {
   display: inline-flex;
   align-items: center;

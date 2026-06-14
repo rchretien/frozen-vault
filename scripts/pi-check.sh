@@ -11,12 +11,18 @@ fi
 
 printf 'Checking static CSS through Nginx...\n'
 curl --fail --silent --show-error --insecure --head \
-  "${BASE_URL}/backend/static/css/app.css" >/dev/null
+  "${BASE_URL}/fridge-app/static/css/app.css" >/dev/null
+
+printf 'Checking deployment metadata endpoint...\n'
+curl --fail --silent --show-error --insecure \
+  "${BASE_URL}/fridge-app/utils/deployment" >/dev/null
 
 printf 'Checking generated HTML for mixed-content local URLs...\n'
-html="$(curl --fail --silent --show-error --insecure "${BASE_URL}/")"
-if grep -q "http://" <<<"${html}"; then
-  printf 'Found insecure http:// URLs in generated HTML.\n' >&2
+html="$(curl --fail --silent --show-error --insecure "${BASE_URL}/fridge-app/")"
+insecure_url_pattern='(href|src|action|hx-get|hx-post|hx-put|hx-delete)=["'"'"']http://'
+if grep -Eiq "${insecure_url_pattern}" <<<"${html}"; then
+  printf 'Found insecure URL-bearing http:// references in generated HTML.\n' >&2
+  grep -Ein "${insecure_url_pattern}" <<<"${html}" >&2
   exit 1
 fi
 

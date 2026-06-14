@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Runtime status - FrozenVault{% endblock %}
+
+{% block content %}
+  <section class="screen-stack">
+    <section class="utility-sheet">
+      <div class="utility-sheet-header">
+        <p class="eyebrow">Status</p>
+        <h2 class="section-title">Runtime index</h2>
+      </div>
+
+      <dl class="runtime-index-list">
+        <div class="runtime-index-item">
+          <dt>Image</dt>
+          <dd>{{ deployment_info.image_ref }}</dd>
+        </div>
+        <div class="runtime-index-item">
+          <dt>Digest</dt>
+          <dd>{{ deployment_info.image_digest }}</dd>
+        </div>
+        <div class="runtime-index-item">
+          <dt>Deployed</dt>
+          <dd>{{ deployment_info.deployed_at }}</dd>
+        </div>
+        <div class="runtime-index-item">
+          <dt>Started</dt>
+          <dd>{{ format_datetime_display(deployment_info.app_started_at) }}</dd>
+        </div>
+        <div class="runtime-index-item">
+          <dt>Uptime</dt>
+          <dd>{{ deployment_info.uptime_label }}</dd>
+        </div>
+        <div class="runtime-index-item">
+          <dt>Runtime</dt>
+          <dd>{{ deployment_info.environment }} - {{ deployment_info.db_type }}</dd>
+        </div>
+        <div class="runtime-index-item">
+          <dt>API version</dt>
+          <dd>{{ deployment_info.api_version }}</dd>
+        </div>
+        <div class="runtime-index-item">
+          <dt>Root path</dt>
+          <dd>{{ deployment_info.root_path }}</dd>
+        </div>
+        <div class="runtime-index-item">
+          <dt>Commit</dt>
+          <dd>{{ deployment_info.commit }}</dd>
+        </div>
+        <div class="runtime-index-item">
+          <dt>Host</dt>
+          <dd>{{ deployment_info.host_name }}</dd>
+        </div>
+      </dl>
+
+      <a class="utility-link runtime-index-link" href="{{ deployment_info.deployment_info_url }}">
+        Open JSON status
+      </a>
+    </section>
+
+    <a class="utility-link" href="{{ url_path_for(request, 'more_page') }}">
+      Back to tools
+    </a>
+  </section>
+{% endblock %}
