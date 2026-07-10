@@ -404,6 +404,10 @@ dd {
   margin-top: 0.5rem;
 }
 
+.inventory-page-actions {
+  margin-top: 0.85rem;
+}
+
 .home-grid,
 .home-shortcut-grid,
 .home-list {
@@ -2160,24 +2164,103 @@ textarea:focus-visible,
     display: grid;
     gap: 0.9rem;
   }
+
+  .sticky-actions {
+    position: static;
+    z-index: auto;
+    padding: 0.7rem;
+    box-shadow: var(--shadow-sm);
+  }
 }
 
 @media (max-width: 540px) {
   .app-shell {
-    padding-inline: 0.85rem;
+    padding: 0.75rem 0.85rem 5.75rem;
+  }
+
+  .app-header {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.85rem;
+    padding: 0.45rem 0;
+  }
+
+  .header-brand {
+    min-width: 0;
+    padding-left: 0;
   }
 
   .brand-lockup {
-    align-items: flex-start;
+    align-items: center;
+    gap: 0.65rem;
   }
 
   .brand-mark {
-    width: 3.75rem;
-    height: 3.75rem;
+    width: 2.9rem;
+    height: 2.9rem;
+    border-radius: 0.85rem;
+  }
+
+  .header-brand h1 {
+    font-size: 1.45rem;
+  }
+
+  .header-brand .eyebrow {
+    font-size: 0.68rem;
+  }
+
+  .header-action {
+    flex: 0 0 auto;
+    min-height: 2.55rem;
+    margin-right: 0;
+    padding: 0.65rem 0.85rem;
+    border-radius: 0.95rem;
   }
 
   .header-subtitle {
     display: none;
+  }
+
+  .panel,
+  .screen-summary,
+  .flash,
+  .utility-sheet,
+  .form-panel {
+    padding: 0.9rem;
+  }
+
+  .inventory-page-header {
+    gap: 0.85rem;
+  }
+
+  .inventory-page-header .hero-copy {
+    font-size: 0.9rem;
+  }
+
+  .inventory-page-actions {
+    margin-top: 0.35rem;
+  }
+
+  .inventory-page-actions .quick-add-fab {
+    min-height: 3.25rem;
+  }
+
+  .form-panel {
+    gap: 0.85rem;
+  }
+
+  .form-section {
+    padding: 0.9rem;
+  }
+
+  .form-actions {
+    gap: 0.7rem;
+  }
+
+  .form-actions .primary-button,
+  .form-actions .secondary-button {
+    min-height: 3rem;
   }
 
   .top-metrics {

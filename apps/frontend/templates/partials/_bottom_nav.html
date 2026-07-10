@@ -23,10 +23,10 @@
     {% include 'partials/_heroicon.html' %}
     <span>Soon</span>
   </a>
-  <a class="bottom-nav-link {% if active_nav == 'more' %}is-active{% endif %}" href="{{ url_path_for(request, 'more_page') }}" {% if active_nav == 'more' %}aria-current="page"{% endif %}>
+  <a class="bottom-nav-link {% if active_nav == 'more' %}is-active{% endif %}" href="{{ url_path_for(request, 'more_page') }}" aria-label="Tools and developer links" {% if active_nav == 'more' %}aria-current="page"{% endif %}>
     {% set icon_name = 'ellipsis-horizontal' %}
     {% set icon_class = 'bottom-nav-icon' %}
     {% include 'partials/_heroicon.html' %}
-    <span>More</span>
+    <span>Tools</span>
   </a>
 </nav>

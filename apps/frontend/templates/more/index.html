@@ -1,13 +1,14 @@
 {% extends 'base.html' %}
 
-{% block title %}More · FrozenVault{% endblock %}
+{% block title %}Tools · FrozenVault{% endblock %}
+{% block meta_description %}Open FrozenVault runtime status, API documentation, and planned inventory shortcuts.{% endblock %}
 
 {% block content %}
   <section class="screen-stack">
     <section class="utility-sheet">
       <div class="utility-sheet-header">
-        <p class="eyebrow">Utilities</p>
-        <h2 class="section-title">Tools</h2>
+        <p class="eyebrow">Developer tools</p>
+        <h2 class="section-title">Runtime and API</h2>
       </div>
 
       <a class="utility-row" href="{{ url_path_for(request, 'deployment_status_page') }}">
@@ -33,7 +34,7 @@
 
     <section class="utility-sheet">
       <div class="utility-sheet-header">
-        <p class="eyebrow">Planned</p>
+        <p class="eyebrow">App shortcuts</p>
         <h2 class="section-title">Future shortcuts</h2>
       </div>
 

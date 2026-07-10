@@ -232,6 +232,21 @@ def _get_inventory_context(
     soon_url = _url_path_with_query(request, "inventory_soon", query_params=soon_params)
     expired_url = _url_path_with_query(request, "inventory_soon", query_params=expired_params)
 
+    is_soon_view = active_nav == "soon"
+    page_headline = (
+        "Clear the urgent queue." if is_soon_view else "Find, filter, and update items fast."
+    )
+    page_copy = (
+        "Focus on expired products and items that should be used in the next few days."
+        if is_soon_view
+        else "Search by name, narrow by urgency, and keep every product easy to manage."
+    )
+    page_meta_description = (
+        "Review FrozenVault products that are expired or expiring soon."
+        if is_soon_view
+        else "Search, filter, and manage your FrozenVault fridge inventory."
+    )
+
     return {
         "request": request,
         "active_nav": active_nav,
@@ -256,12 +271,16 @@ def _get_inventory_context(
         ],
         "product_type_options": [enum.value for enum in ProductTypeEnum],
         "product_location_options": [enum.value for enum in ProductLocationEnum],
-        "screen_title": "Expiring soon" if active_nav == "soon" else "Inventory",
+        "screen_title": "Expiring soon" if is_soon_view else "Inventory",
         "screen_subtitle": (
             "Use this view to clear items before they go bad."
-            if active_nav == "soon"
+            if is_soon_view
             else "Track what you have, what is running low, and what needs attention."
         ),
+        "page_eyebrow": "Urgency view" if is_soon_view else "Inventory management",
+        "page_headline": page_headline,
+        "page_copy": page_copy,
+        "page_meta_description": page_meta_description,
         "flash": request.query_params.get("flash"),
         "flash_level": request.query_params.get("flash_level", "success"),
     }
@@ -308,11 +327,15 @@ def _render_form_page(
 ) -> HTMLResponse:
     """Render the shared product form page."""
     form_errors = errors or {}
+    action_verb = "Update" if submit_label.startswith("Save") else "Add"
     return templates.TemplateResponse(
         request=request,
         name="inventory/form_page.html",
         context={
             "title": title,
+            "screen_title": title,
+            "screen_subtitle": f"{action_verb} item details, quantity, expiry, and storage.",
+            "meta_description": f"{action_verb} a FrozenVault inventory item with expiry and storage details.",
             "submit_label": submit_label,
             "action_url": action_url,
             "form_data": form_data,
@@ -335,8 +358,8 @@ def _render_more_page(request: Request) -> HTMLResponse:
         name="more/index.html",
         context={
             "active_nav": "more",
-            "screen_title": "More",
-            "screen_subtitle": "Tools, documentation, and the next capabilities planned for this app.",
+            "screen_title": "Tools",
+            "screen_subtitle": "Runtime status, API docs, and the next capabilities planned for this app.",
         },
     )
 
