@@ -95,6 +95,17 @@ def url_path_for(request: Request, route_name: str, **path_params: object) -> st
     return request.url_for(route_name, **path_params).path
 
 
+def static_asset_version(path: str) -> str:
+    """Return a cache-busting version for static assets."""
+    if config.commit_sha:
+        return config.commit_sha
+
+    try:
+        return str(int((STATIC_DIR / path).stat().st_mtime))
+    except OSError:
+        return "local"
+
+
 templates = Jinja2Templates(directory=str(TEMPLATE_DIR))
 templates.env.globals.update(
     config=config,
@@ -107,4 +118,5 @@ templates.env.globals.update(
     product_location_label=product_location_label,
     product_unit_label=product_unit_label,
     url_path_for=url_path_for,
+    static_asset_version=static_asset_version,
 )

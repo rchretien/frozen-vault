@@ -85,8 +85,19 @@ def test_home_page_uses_path_only_local_urls(client: TestClient) -> None:
 
     assert response.status_code == httpx.codes.OK
     assert 'href="/static/css/app.css' in response.text
-    assert 'src="/static/js/app.js"' in response.text
+    assert 'src="/static/js/app.js?v=' in response.text
     assert "http://testserver" not in response.text
+
+
+def test_web_pages_render_meta_descriptions(client: TestClient) -> None:
+    """Full web pages should expose concise descriptions for crawlers and previews."""
+    response = client.get("/web/inventory")
+
+    assert response.status_code == httpx.codes.OK
+    assert (
+        '<meta name="description" content="Search, filter, and manage your FrozenVault fridge '
+        'inventory.">' in response.text
+    )
 
 
 def test_home_page_shows_urgent_items_outside_recent_preview(client: TestClient) -> None:
@@ -123,7 +134,7 @@ def test_inventory_page_renders_mobile_controls(client: TestClient) -> None:
     assert 'id="inventory-controls"' in response.text
     assert "Add product" in response.text
     assert "Inventory" in response.text
-    assert "More" in response.text
+    assert "Tools" in response.text
 
 
 def test_inventory_mobile_cards_are_clickable_and_swipe_deletable(client: TestClient) -> None:
@@ -193,19 +204,22 @@ def test_inventory_soon_page_renders_urgency_screen(client: TestClient) -> None:
 
     assert response.status_code == httpx.codes.OK
     assert "Expiring soon" in response.text
-    assert "Soon" in response.text
+    assert "Clear the urgent queue." in response.text
+    assert "Focus on expired products and items that should be used" in response.text
 
 
 def test_more_page_renders_utility_screen(client: TestClient) -> None:
-    """The More destination should render utility links instead of jumping straight to docs."""
+    """The Tools destination should keep runtime and API links visible."""
     response = client.get("/web/more")
 
     assert response.status_code == httpx.codes.OK
-    assert "Tools" in response.text
+    assert "Runtime and API" in response.text
+    assert "Developer tools" in response.text
     assert "Runtime status" in response.text
     assert 'href="/web/more/deployment"' in response.text
     assert "API documentation" in response.text
     assert 'href="/docs"' in response.text
+    assert 'aria-label="Tools and developer links"' in response.text
     assert "Runtime index" not in response.text
     assert "Open JSON status" not in response.text
 
@@ -235,6 +249,8 @@ def test_new_product_page_renders_form(client: TestClient) -> None:
     response = client.get("/web/inventory/new")
 
     assert response.status_code == httpx.codes.OK
+    assert "<h1>Add product</h1>" in response.text
+    assert "Add item details, quantity, expiry, and storage." in response.text
     assert "Create product" in response.text
     assert 'name="product_name"' in response.text
     assert 'type="date"' in response.text
