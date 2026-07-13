@@ -4,8 +4,8 @@ from typing import Self
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from fridge_app_backend.orm.enums.base_enums import ProductLocationEnum
-from fridge_app_backend.orm.models.db_models import ProductLocation
+from frozen_vault_backend.orm.enums.base_enums import ProductLocationEnum
+from frozen_vault_backend.orm.models.db_models import ProductLocation
 
 
 class ProductLocationBase(BaseModel):

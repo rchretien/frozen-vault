@@ -5,8 +5,8 @@ from collections.abc import Iterator
 import pytest
 from fastapi.testclient import TestClient
 
-from fridge_app_backend.api.app import app
-from fridge_app_backend.orm.database import reset_db
+from frozen_vault_backend.api.app import app
+from frozen_vault_backend.orm.database import reset_db
 
 
 @pytest.fixture

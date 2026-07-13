@@ -5,7 +5,7 @@ from pathlib import Path
 
 from dotenv import dotenv_values
 
-from fridge_app_backend.exceptions import EnvironmentVariableNotFoundError
+from frozen_vault_backend.exceptions import EnvironmentVariableNotFoundError
 
 
 # TODO(Renaud): rely on same function from toolbox, once it accepts a defaut path for .env file.

@@ -11,9 +11,9 @@ from sqlalchemy.orm import Session, selectinload
 from sqlalchemy.sql.elements import ColumnElement
 from sqlalchemy.sql.functions import func
 
-from fridge_app_backend.exceptions import ModelNotHavingAttributeError
-from fridge_app_backend.orm.enums.base_enums import OrderByEnum
-from fridge_app_backend.orm.models.db_models import BaseWithID
+from frozen_vault_backend.exceptions import ModelNotHavingAttributeError
+from frozen_vault_backend.orm.enums.base_enums import OrderByEnum
+from frozen_vault_backend.orm.models.db_models import BaseWithID
 
 ModelType = TypeVar("ModelType", bound=BaseWithID)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)

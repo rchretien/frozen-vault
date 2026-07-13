@@ -7,15 +7,15 @@ from fastapi import APIRouter, Query
 from fastapi.responses import Response
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_404_NOT_FOUND
 
-from fridge_app_backend.api.dependencies.product_dependencies import (
+from frozen_vault_backend.api.dependencies.product_dependencies import (
     ProductDependency,
     SessionDependency,
     ValidatedProductUpdateDependency,
 )
-from fridge_app_backend.config import config
-from fridge_app_backend.orm.crud.product_crud import product_crud
-from fridge_app_backend.orm.enums.base_enums import OrderByEnum
-from fridge_app_backend.orm.schemas.product_schemas import (
+from frozen_vault_backend.config import config
+from frozen_vault_backend.orm.crud.product_crud import product_crud
+from frozen_vault_backend.orm.enums.base_enums import OrderByEnum
+from frozen_vault_backend.orm.schemas.product_schemas import (
     CreatedProduct,
     ErrorResponse,
     ProductCreate,

@@ -11,7 +11,7 @@ from collections.abc import Sequence
 import sqlalchemy as sa
 from alembic import op
 
-from fridge_app_backend.orm.enums.base_enums import ProductLocationEnum, ProductTypeEnum
+from frozen_vault_backend.orm.enums.base_enums import ProductLocationEnum, ProductTypeEnum
 
 # revision identifiers, used by Alembic.
 revision: str = "ea84b5ce47e9"

@@ -6,15 +6,15 @@ from typing import Self
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from fridge_app_backend.config import config
-from fridge_app_backend.exceptions import InvalidExpiryDateError
-from fridge_app_backend.orm.crud.base_crud import PaginatedResponse
-from fridge_app_backend.orm.enums.base_enums import (
+from frozen_vault_backend.config import config
+from frozen_vault_backend.exceptions import InvalidExpiryDateError
+from frozen_vault_backend.orm.crud.base_crud import PaginatedResponse
+from frozen_vault_backend.orm.enums.base_enums import (
     ProductLocationEnum,
     ProductTypeEnum,
     ProductUnitEnum,
 )
-from fridge_app_backend.orm.models.db_models import Product
+from frozen_vault_backend.orm.models.db_models import Product
 
 
 class ProductName(BaseModel):

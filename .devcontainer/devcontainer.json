@@ -1,5 +1,5 @@
 {
-    "name": "fridge-app-workspace",
+    "name": "frozen-vault-workspace",
     "dockerComposeFile": "../docker-compose.yml",
     "service": "devcontainer",
     "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}/",

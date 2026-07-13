@@ -9,8 +9,8 @@ from sqlalchemy import engine_from_config, pool
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 # Import your models and config
-from fridge_app_backend.config import get_settings  # Your config
-from fridge_app_backend.orm.models.db_models import Base  # Your Base class
+from frozen_vault_backend.config import get_settings  # Your config
+from frozen_vault_backend.orm.models.db_models import Base  # Your Base class
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

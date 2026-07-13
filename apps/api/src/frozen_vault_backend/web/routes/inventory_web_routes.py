@@ -9,23 +9,27 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from pydantic import ValidationError
 from starlette.status import HTTP_303_SEE_OTHER, HTTP_404_NOT_FOUND
 
-from fridge_app_backend.api.dependencies.product_dependencies import SessionDependency
-from fridge_app_backend.api.deployment_info import get_deployment_info
-from fridge_app_backend.config import config
-from fridge_app_backend.exceptions import (
+from frozen_vault_backend.api.dependencies.product_dependencies import SessionDependency
+from frozen_vault_backend.api.deployment_info import get_deployment_info
+from frozen_vault_backend.config import config
+from frozen_vault_backend.exceptions import (
     InvalidExpiryDateError,
     InvalidProductLocationError,
     InvalidProductTypeError,
 )
-from fridge_app_backend.orm.crud.product_crud import product_crud
-from fridge_app_backend.orm.enums.base_enums import (
+from frozen_vault_backend.orm.crud.product_crud import product_crud
+from frozen_vault_backend.orm.enums.base_enums import (
     OrderByEnum,
     ProductLocationEnum,
     ProductTypeEnum,
     ProductUnitEnum,
 )
-from fridge_app_backend.orm.schemas.product_schemas import ProductCreate, ProductRead, ProductUpdate
-from fridge_app_backend.web.templating import expiry_status, format_date_input, templates
+from frozen_vault_backend.orm.schemas.product_schemas import (
+    ProductCreate,
+    ProductRead,
+    ProductUpdate,
+)
+from frozen_vault_backend.web.templating import expiry_status, format_date_input, templates
 
 inventory_web_router = APIRouter(include_in_schema=False)
 
@@ -372,7 +376,7 @@ def _render_deployment_status_page(request: Request) -> HTMLResponse:
         context={
             "active_nav": "more",
             "screen_title": "Runtime status",
-            "screen_subtitle": "Deployment and runtime metadata for this fridge app instance.",
+            "screen_subtitle": "Deployment and runtime metadata for this FrozenVault instance.",
             "deployment_info": get_deployment_info(request),
         },
     )

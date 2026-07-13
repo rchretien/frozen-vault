@@ -3,12 +3,12 @@
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
-from fridge_app_backend.api.deployment_info import DeploymentInfo, get_deployment_info
-from fridge_app_backend.orm.crud.product_location_crud import product_location_crud
-from fridge_app_backend.orm.crud.product_type_crud import product_type_crud
-from fridge_app_backend.orm.database import get_session
-from fridge_app_backend.orm.schemas.product_location_schemas import ProductLocationReadList
-from fridge_app_backend.orm.schemas.product_type_schemas import ProductTypeReadList
+from frozen_vault_backend.api.deployment_info import DeploymentInfo, get_deployment_info
+from frozen_vault_backend.orm.crud.product_location_crud import product_location_crud
+from frozen_vault_backend.orm.crud.product_type_crud import product_type_crud
+from frozen_vault_backend.orm.database import get_session
+from frozen_vault_backend.orm.schemas.product_location_schemas import ProductLocationReadList
+from frozen_vault_backend.orm.schemas.product_type_schemas import ProductTypeReadList
 
 utils_router = APIRouter(prefix="/utils", tags=["Utilities"])
 

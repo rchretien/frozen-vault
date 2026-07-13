@@ -1,6 +1,6 @@
-# Fridge App Backend API
+# FrozenVault Backend API
 
-Backend API documentation for the Fridge App.
+Backend API documentation for FrozenVault.
 
 ## Development
 

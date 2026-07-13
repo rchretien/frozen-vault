@@ -5,16 +5,16 @@ from datetime import datetime, timedelta
 import pytest
 from sqlalchemy.exc import NoResultFound
 
-from fridge_app_backend.config import config
-from fridge_app_backend.exceptions import ModelNotHavingAttributeError
-from fridge_app_backend.orm.crud.product_crud import CRUDProduct, product_crud
-from fridge_app_backend.orm.database import SessionLocal, reset_db
-from fridge_app_backend.orm.enums.base_enums import (
+from frozen_vault_backend.config import config
+from frozen_vault_backend.exceptions import ModelNotHavingAttributeError
+from frozen_vault_backend.orm.crud.product_crud import CRUDProduct, product_crud
+from frozen_vault_backend.orm.database import SessionLocal, reset_db
+from frozen_vault_backend.orm.enums.base_enums import (
     ProductLocationEnum,
     ProductTypeEnum,
     ProductUnitEnum,
 )
-from fridge_app_backend.orm.schemas.product_schemas import ProductCreate, ProductUpdate
+from frozen_vault_backend.orm.schemas.product_schemas import ProductCreate, ProductUpdate
 
 
 def _product_payload(name: str) -> ProductCreate:

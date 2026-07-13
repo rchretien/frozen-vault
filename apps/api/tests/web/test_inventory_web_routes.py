@@ -7,8 +7,8 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 
-from fridge_app_backend.config import config
-from fridge_app_backend.orm.enums.base_enums import (
+from frozen_vault_backend.config import config
+from frozen_vault_backend.orm.enums.base_enums import (
     ProductLocationEnum,
     ProductTypeEnum,
     ProductUnitEnum,
@@ -228,8 +228,8 @@ def test_deployment_status_page_renders_values(
     monkeypatch: pytest.MonkeyPatch, client: TestClient
 ) -> None:
     """The runtime status tool should show deployment values after opening it."""
-    monkeypatch.setenv("IMAGE_REF", "ghcr.io/rchretien/fridge-app:latest")
-    monkeypatch.setenv("IMAGE_DIGEST", "ghcr.io/rchretien/fridge-app@sha256:test")
+    monkeypatch.setenv("IMAGE_REF", "ghcr.io/rchretien/frozen-vault:latest")
+    monkeypatch.setenv("IMAGE_DIGEST", "ghcr.io/rchretien/frozen-vault@sha256:test")
     monkeypatch.setenv("DEPLOYED_AT", "2026-06-14T12:00:00Z")
 
     response = client.get("/web/more/deployment")
@@ -237,8 +237,8 @@ def test_deployment_status_page_renders_values(
     assert response.status_code == httpx.codes.OK
     assert "Runtime index" in response.text
     assert "Image" in response.text
-    assert "ghcr.io/rchretien/fridge-app:latest" in response.text
-    assert "ghcr.io/rchretien/fridge-app@sha256:test" in response.text
+    assert "ghcr.io/rchretien/frozen-vault:latest" in response.text
+    assert "ghcr.io/rchretien/frozen-vault@sha256:test" in response.text
     assert "2026-06-14T12:00:00Z" in response.text
     assert 'href="/utils/deployment"' in response.text
     assert 'href="/web/more"' in response.text

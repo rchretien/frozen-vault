@@ -1,11 +1,11 @@
-"""Tests for fridge_app_backend.api.utils."""
+"""Tests for frozen_vault_backend.api.utils."""
 
 from pathlib import Path
 
 import pytest
 
-from fridge_app_backend.api.utils import get_env_var
-from fridge_app_backend.exceptions import EnvironmentVariableNotFoundError
+from frozen_vault_backend.api.utils import get_env_var
+from frozen_vault_backend.exceptions import EnvironmentVariableNotFoundError
 
 
 def test_get_env_var_prefers_exact_env(monkeypatch: pytest.MonkeyPatch) -> None:

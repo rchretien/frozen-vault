@@ -11,7 +11,7 @@ from pytz import timezone
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.pool import NullPool, StaticPool
 
-from fridge_app_backend.exceptions import BadDBTypeError, BadEnvironmentError
+from frozen_vault_backend.exceptions import BadDBTypeError, BadEnvironmentError
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

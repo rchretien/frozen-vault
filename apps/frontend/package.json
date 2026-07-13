@@ -1,8 +1,8 @@
 {
-  "name": "fridge-app-frontend",
+  "name": "frozen-vault-frontend",
   "version": "1.0.0",
   "private": true,
-  "description": "Lightweight frontend assets for the Fridge App web UI",
+  "description": "Lightweight frontend assets for the FrozenVault web UI",
   "scripts": {
     "icons:list": "ls node_modules/heroicons/24/outline"
   },

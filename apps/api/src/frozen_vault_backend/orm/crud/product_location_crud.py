@@ -1,8 +1,8 @@
 """CRUD operations for the product location model."""
 
-from fridge_app_backend.orm.crud.base_crud import CRUDBase
-from fridge_app_backend.orm.models.db_models import ProductLocation
-from fridge_app_backend.orm.schemas.product_location_schemas import (
+from frozen_vault_backend.orm.crud.base_crud import CRUDBase
+from frozen_vault_backend.orm.models.db_models import ProductLocation
+from frozen_vault_backend.orm.schemas.product_location_schemas import (
     ProductLocationCreate,
     ProductLocationUpdate,
 )
