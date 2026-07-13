@@ -163,12 +163,18 @@ def _get_inventory_context(
     products = [ProductRead.from_model(product) for product in paginated_response.data]
     grouped_products = {
         "expired": [
-            product for product in products if expiry_status(product.expiry_date) == "expired"
+            product
+            for product in products
+            if expiry_status(product.best_quality_until) == "expired"
         ],
         "expiring-soon": [
-            product for product in products if expiry_status(product.expiry_date) == "expiring-soon"
+            product
+            for product in products
+            if expiry_status(product.best_quality_until) == "expiring-soon"
         ],
-        "fresh": [product for product in products if expiry_status(product.expiry_date) == "fresh"],
+        "fresh": [
+            product for product in products if expiry_status(product.best_quality_until) == "fresh"
+        ],
     }
     if filters["urgency"] == "expired":
         group_config = [("expired", "Expired now", "Products that need to be removed or replaced.")]
@@ -311,7 +317,7 @@ def _form_data_from_product(product: ProductRead) -> dict[str, str]:
         "description": product.description,
         "quantity": str(product.quantity),
         "unit": product.unit.value,
-        "expiry_date": format_date_input(product.expiry_date),
+        "expiry_date": product.expiry_date.isoformat(),
         "expiry_date_date": format_date_input(product.expiry_date),
         "product_location": product.product_location.value,
         "product_type": product.product_type.value,
@@ -344,6 +350,7 @@ def _render_form_page(
             "action_url": action_url,
             "form_data": form_data,
             "errors": form_errors,
+            "is_edit": action_verb == "Update",
             "active_nav": active_nav,
             "return_to": _safe_return_to(return_to, fallback="/web/inventory"),
             "flash": FORM_ERROR_FLASH if form_errors else None,
@@ -695,7 +702,6 @@ async def edit_product_page(
 
     product_view = ProductRead.from_model(product)
     form_data = _form_data_from_product(product_view)
-    form_data["expiry_date"] = format_date_input(product_view.expiry_date)
     return _render_form_page(
         request=request,
         title=f"Edit {product_view.product_name}",
@@ -718,8 +724,6 @@ async def update_product_page(
     description: str = Form(default=""),
     quantity: str = Form(default=""),
     unit: str = Form(default=""),
-    expiry_date: str = Form(default=""),
-    expiry_date_date: str = Form(default=""),
     product_location: str = Form(default=""),
     product_type: str = Form(default=""),
     return_to: str = Form(default="/web/inventory"),
@@ -736,13 +740,11 @@ async def update_product_page(
         description=description,
         quantity=quantity,
         unit=unit,
-        expiry_date=_coalesce_expiry_date(
-            expiry_date=expiry_date, expiry_date_date=expiry_date_date
-        ),
+        expiry_date=product.expiry_date.isoformat(),
         product_location=product_location,
         product_type=product_type,
     )
-    form_data["expiry_date_date"] = expiry_date_date or form_data["expiry_date"][:10]
+    form_data["expiry_date_date"] = format_date_input(product.expiry_date)
     missing_errors = _missing_field_errors(form_data)
     if missing_errors:
         return _render_form_page(

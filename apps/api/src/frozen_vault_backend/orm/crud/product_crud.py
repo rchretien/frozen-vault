@@ -8,10 +8,14 @@ from sqlalchemy.orm import Session
 
 from frozen_vault_backend.config import config
 from frozen_vault_backend.exceptions import InvalidProductLocationError, InvalidProductTypeError
-from frozen_vault_backend.orm.crud.base_crud import CRUDBase
+from frozen_vault_backend.orm.crud.base_crud import CRUDBase, PaginatedResponse
 from frozen_vault_backend.orm.enums.base_enums import OrderByEnum
 from frozen_vault_backend.orm.models.db_models import Product, ProductLocation, ProductType
-from frozen_vault_backend.orm.schemas.product_schemas import ProductCreate, ProductUpdate
+from frozen_vault_backend.orm.schemas.product_schemas import (
+    ProductCreate,
+    ProductUpdate,
+    calculate_best_quality_until,
+)
 
 
 class CRUDProduct(CRUDBase[Product, ProductCreate, ProductUpdate]):
@@ -65,6 +69,7 @@ class CRUDProduct(CRUDBase[Product, ProductCreate, ProductUpdate]):
         """Encode a ProductUpdate Pydantic model to a dictionary of scalar columns."""
         obj_dict = obj_in.model_dump(exclude_unset=True)
         scalar_values = self._collect_scalar_values(obj_dict, session)
+        scalar_values.pop("expiry_date", None)
         return scalar_values
 
     def get_names_starting_with(self, product_name: str, session: Session) -> list[str]:
@@ -111,19 +116,52 @@ class CRUDProduct(CRUDBase[Product, ProductCreate, ProductUpdate]):
                 data_statement = data_statement.where(self.model.name.ilike(f"{prefix}%"))
                 count_statement = count_statement.where(self.model.name.ilike(f"{prefix}%"))
 
+        def quality_date(product: Product) -> datetime:
+            return calculate_best_quality_until(
+                creation_date=product.creation_date, product_type=product.product_type.name
+            )
+
         if urgency in {"soon", "expired"}:
-            current_time = datetime.now(tz=config.brussels_tz).replace(tzinfo=None)
+            products = list(
+                session.scalars(
+                    data_statement.options(*self.recursive_options).order_by(order_by_expression)
+                ).all()
+            )
+            current_time = datetime.now(tz=config.brussels_tz)
+            threshold = current_time + timedelta(days=3)
+
             if urgency == "expired":
-                data_statement = data_statement.where(self.model.expiry_date < current_time)
-                count_statement = count_statement.where(self.model.expiry_date < current_time)
+                products = [product for product in products if quality_date(product) < current_time]
             else:
-                threshold = (datetime.now(tz=config.brussels_tz) + timedelta(days=3)).replace(
-                    tzinfo=None
+                products = [
+                    product
+                    for product in products
+                    if current_time <= quality_date(product) <= threshold
+                ]
+
+            if order_by == OrderByEnum.EXPIRY_DATE:
+                products.sort(
+                    key=lambda product: (quality_date(product), product.id), reverse=not ascending
                 )
-                data_statement = data_statement.where(self.model.expiry_date >= current_time)
-                data_statement = data_statement.where(self.model.expiry_date <= threshold)
-                count_statement = count_statement.where(self.model.expiry_date >= current_time)
-                count_statement = count_statement.where(self.model.expiry_date <= threshold)
+
+            return PaginatedResponse(
+                data=products[offset : offset + limit],
+                total=len(products),
+                offset=offset,
+                limit=limit,
+            )
+
+        if order_by == OrderByEnum.EXPIRY_DATE:
+            products = list(session.scalars(data_statement.options(*self.recursive_options)).all())
+            products.sort(
+                key=lambda product: (quality_date(product), product.id), reverse=not ascending
+            )
+            return PaginatedResponse(
+                data=products[offset : offset + limit],
+                total=len(products),
+                offset=offset,
+                limit=limit,
+            )
 
         data_statement = data_statement.order_by(order_by_expression).offset(offset).limit(limit)
 
