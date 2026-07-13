@@ -1,8 +1,8 @@
-site_name: Fridge App Backend API Documentation
-site_description: API documentation for the Fridge App Backend project.
-site_url: https://rchretien.github.io/fridge-app
-repo_url: https://github.com/rchretien/fridge-app
-repo_name: rchretien/fridge-app
+site_name: FrozenVault Backend API Documentation
+site_description: API documentation for the FrozenVault backend.
+site_url: https://rchretien.github.io/frozen-vault
+repo_url: https://github.com/rchretien/frozen-vault
+repo_name: rchretien/frozen-vault
 
 theme:
   name: material

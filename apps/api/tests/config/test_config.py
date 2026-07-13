@@ -5,8 +5,8 @@ from pathlib import Path
 import pytest
 from sqlalchemy.pool import NullPool, StaticPool
 
-from fridge_app_backend.config import AVAILABLE_DB_TYPES, Config, create_database_engine
-from fridge_app_backend.exceptions import BadDBTypeError, BadEnvironmentError
+from frozen_vault_backend.config import AVAILABLE_DB_TYPES, Config, create_database_engine
+from frozen_vault_backend.exceptions import BadDBTypeError, BadEnvironmentError
 
 
 def test_config_rejects_invalid_environment() -> None:

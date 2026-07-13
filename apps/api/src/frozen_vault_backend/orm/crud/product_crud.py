@@ -6,12 +6,12 @@ from typing import Any
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from fridge_app_backend.config import config
-from fridge_app_backend.exceptions import InvalidProductLocationError, InvalidProductTypeError
-from fridge_app_backend.orm.crud.base_crud import CRUDBase
-from fridge_app_backend.orm.enums.base_enums import OrderByEnum
-from fridge_app_backend.orm.models.db_models import Product, ProductLocation, ProductType
-from fridge_app_backend.orm.schemas.product_schemas import ProductCreate, ProductUpdate
+from frozen_vault_backend.config import config
+from frozen_vault_backend.exceptions import InvalidProductLocationError, InvalidProductTypeError
+from frozen_vault_backend.orm.crud.base_crud import CRUDBase
+from frozen_vault_backend.orm.enums.base_enums import OrderByEnum
+from frozen_vault_backend.orm.models.db_models import Product, ProductLocation, ProductType
+from frozen_vault_backend.orm.schemas.product_schemas import ProductCreate, ProductUpdate
 
 
 class CRUDProduct(CRUDBase[Product, ProductCreate, ProductUpdate]):

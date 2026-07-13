@@ -1,6 +1,6 @@
-[![Open in Dev Containers](https://img.shields.io/static/v1?label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/rchretien/fridge-app) [![Open in GitHub Codespaces](https://img.shields.io/static/v1?label=GitHub%20Codespaces&message=Open&color=blue&logo=github)](https://github.com/codespaces/new/rchretien/fridge-app)
+[![Open in Dev Containers](https://img.shields.io/static/v1?label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/rchretien/frozen-vault) [![Open in GitHub Codespaces](https://img.shields.io/static/v1?label=GitHub%20Codespaces&message=Open&color=blue&logo=github)](https://github.com/codespaces/new/rchretien/frozen-vault)
 
-# Fridge App Backend
+# FrozenVault Backend
 
 This backend now lives inside the workspace at `apps/api`.
 
@@ -36,7 +36,7 @@ uv run poe api
 
 ## 💾 Development Setup with PostgreSQL
 
-This section explains how to set up a local development environment using Docker, PostgreSQL, and Alembic migrations for the Fridge Inventory App Backend.
+This section explains how to set up a local development environment using Docker, PostgreSQL, and Alembic migrations for the FrozenVault backend.
 
 ---
 
@@ -48,7 +48,7 @@ Create a file named `.env-dev` in the project root:
 # Environment
 ENVIRONMENT=dev
 DB_TYPE=postgres
-API_NAME=Fridge Inventory App Backend
+API_NAME=FrozenVault Backend
 
 # Application DB config
 DB_USER=postgres
@@ -81,7 +81,7 @@ psql -h localhost -U postgres -d fridge_inventory_dev
 ```
 ### 4. Start the FastAPI app
 ```
-ENVIRONMENT=dev uv run uvicorn fridge_app_backend.api.app:app --reload
+ENVIRONMENT=dev uv run uvicorn frozen_vault_backend.api.app:app --reload
 
 ```
 The API will connect to the PostgreSQL database using the .env-dev configuration. Run migrations
@@ -151,7 +151,7 @@ docker compose --profile postgres down`
 The following development environments are supported:
 
 1. ⭐️ _GitHub Codespaces_: click on _Code_ and select _Create codespace_ to start a Dev Container with [GitHub Codespaces](https://github.com/features/codespaces).
-1. ⭐️ _Dev Container (with container volume)_: click on [Open in Dev Containers](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/rchretien/fridge-app) to clone this repository in a container volume and create a Dev Container with VS Code.
+1. ⭐️ _Dev Container (with container volume)_: click on [Open in Dev Containers](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/rchretien/frozen-vault) to clone this repository in a container volume and create a Dev Container with VS Code.
 1. _Dev Container_: clone this repository, open it with VS Code, and run <kbd>Ctrl/⌘</kbd> + <kbd>⇧</kbd> + <kbd>P</kbd> → _Dev Containers: Reopen in Container_.
 1. _PyCharm_: clone this repository, open it with PyCharm, and [configure Docker Compose as a remote interpreter](https://www.jetbrains.com/help/pycharm/using-docker-compose-as-a-remote-interpreter.html#docker-compose-remote) with the `dev` service.
 1. _Terminal_: clone this repository, open it with your terminal, and run `docker compose up --detach dev` to start a Dev Container in the background, and then run `docker compose exec dev zsh` to open a shell prompt in the Dev Container.

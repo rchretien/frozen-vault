@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 COMPOSE_FILE="docker-compose-prod.yml"
 ENV_FILE=".env-prod"
-IMAGE_REF="${IMAGE_REF:-ghcr.io/rchretien/fridge-app:latest}"
+IMAGE_REF="${IMAGE_REF:-ghcr.io/rchretien/frozen-vault:latest}"
 
 export IMAGE_REF
 

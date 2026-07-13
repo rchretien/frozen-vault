@@ -1,4 +1,4 @@
-"""SQLAlchemy ORM model definitions for the fridge app backend."""
+"""SQLAlchemy ORM model definitions for the FrozenVault backend."""
 
 from datetime import datetime
 
@@ -6,7 +6,7 @@ from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Integer, String
 from sqlalchemy import Enum as SQLAlchemyEnum
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, relationship
 
-from fridge_app_backend.orm.enums.base_enums import (
+from frozen_vault_backend.orm.enums.base_enums import (
     ProductLocationEnum,
     ProductTypeEnum,
     ProductUnitEnum,

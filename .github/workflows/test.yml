@@ -50,7 +50,7 @@ jobs:
           uv run --directory apps/api python - <<'PY'
           from sqlalchemy import create_engine, inspect, text
 
-          from fridge_app_backend.config import config
+          from frozen_vault_backend.config import config
 
           engine = create_engine(config.db_url)
           with engine.connect() as connection:

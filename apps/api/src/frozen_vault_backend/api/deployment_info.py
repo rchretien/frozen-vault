@@ -7,7 +7,7 @@ from datetime import datetime
 from fastapi import Request
 from pydantic import BaseModel
 
-from fridge_app_backend.config import config
+from frozen_vault_backend.config import config
 
 UNKNOWN = "unknown"
 

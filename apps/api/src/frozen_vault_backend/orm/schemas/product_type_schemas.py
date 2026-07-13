@@ -4,8 +4,8 @@ from typing import Self
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from fridge_app_backend.orm.enums.base_enums import ProductTypeEnum
-from fridge_app_backend.orm.models.db_models import ProductType
+from frozen_vault_backend.orm.enums.base_enums import ProductTypeEnum
+from frozen_vault_backend.orm.models.db_models import ProductType
 
 
 class ProductTypeBase(BaseModel):

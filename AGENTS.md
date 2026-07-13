@@ -6,12 +6,12 @@
 
 ## 📋 Project Overview
 
-**Project Name**: Fridge App Workspace  
+**Project Name**: FrozenVault
 **Type**: Multi-app workspace  
 **Primary Language**: Python 3.13+  
 **Framework**: FastAPI  
 **Database**: SQLAlchemy ORM (SQLite in-memory for dev, configurable for production)  
-**Purpose**: Workspace for the fridge inventory application, currently hosting the backend API and prepared to host a frontend
+**Purpose**: Fridge inventory application with a FastAPI backend and server-rendered frontend
 
 ### What This Application Does
 This is a CRUD (Create, Read, Update, Delete) REST API that manages a fridge inventory. Users can:
@@ -27,10 +27,10 @@ This is a CRUD (Create, Read, Update, Delete) REST API that manages a fridge inv
 
 ### Project Structure
 ```
-fridge-app/
+frozen-vault/
 ├── apps/
 │   └── api/
-│       ├── src/fridge_app_backend/   # Main backend package
+│       ├── src/frozen_vault_backend/   # Main backend package
 │       │   ├── api/                  # API layer
 │       │   │   ├── routes/           # API endpoint definitions
 │       │   │   └── dependencies/     # FastAPI dependencies
@@ -165,7 +165,7 @@ The update operation had multiple issues (recently fixed):
 - Uses Pydantic Settings with environment-specific `.env` files
 - Environment is determined by `ENVIRONMENT` env var (defaults to "local")
 - Config is cached with `@lru_cache` for performance
-- Access via `from fridge_app_backend.config import config`
+- Access via `from frozen_vault_backend.config import config`
 - **Engine Creation**: Use `create_database_engine()` from `config.py` for all database engine construction
 
 ### 4. Timezone Handling
@@ -213,7 +213,7 @@ The update operation had multiple issues (recently fixed):
 ### Writing Tests
 ```python
 from fastapi.testclient import TestClient
-from fridge_app_backend.api.app import app
+from frozen_vault_backend.api.app import app
 
 client = TestClient(app)
 
@@ -227,7 +227,7 @@ def test_example():
 ## 🐛 Debugging Tips
 
 ### Enable SQLAlchemy Query Logging
-In `src/fridge_app_backend/api/app.py`, change:
+In `src/frozen_vault_backend/api/app.py`, change:
 ```python
 logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)  # or DEBUG
 ```

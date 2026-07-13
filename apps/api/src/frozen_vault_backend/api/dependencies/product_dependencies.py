@@ -6,10 +6,10 @@ from fastapi import Body, Depends, HTTPException
 from sqlalchemy.orm import Session
 from starlette.status import HTTP_404_NOT_FOUND
 
-from fridge_app_backend.orm.crud.product_crud import product_crud
-from fridge_app_backend.orm.database import get_session
-from fridge_app_backend.orm.models.db_models import Product
-from fridge_app_backend.orm.schemas.product_schemas import ProductUpdate
+from frozen_vault_backend.orm.crud.product_crud import product_crud
+from frozen_vault_backend.orm.database import get_session
+from frozen_vault_backend.orm.models.db_models import Product
+from frozen_vault_backend.orm.schemas.product_schemas import ProductUpdate
 
 SessionDependency = Annotated[Session, Depends(get_session)]
 

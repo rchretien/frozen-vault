@@ -7,14 +7,14 @@ import httpx
 from fastapi.testclient import TestClient
 from sqlalchemy import delete, text
 
-from fridge_app_backend.config import config
-from fridge_app_backend.orm.database import SessionLocal
-from fridge_app_backend.orm.enums.base_enums import (
+from frozen_vault_backend.config import config
+from frozen_vault_backend.orm.database import SessionLocal
+from frozen_vault_backend.orm.enums.base_enums import (
     ProductLocationEnum,
     ProductTypeEnum,
     ProductUnitEnum,
 )
-from fridge_app_backend.orm.models.db_models import ProductType
+from frozen_vault_backend.orm.models.db_models import ProductType
 
 
 def _product_payload(**overrides: Any) -> dict[str, Any]:

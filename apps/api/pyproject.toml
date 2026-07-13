@@ -3,9 +3,9 @@ requires = ["hatchling>=1.27.0"]
 build-backend = "hatchling.build"
 
 [project]  # https://packaging.python.org/en/latest/specifications/pyproject-toml/
-name = "fridge-app-backend"
+name = "frozen-vault-backend"
 version = "0.0.0"
-description = "Backend API for the Fridge App"
+description = "Backend API for FrozenVault"
 readme = "README.md"
 authors = [
   { name = "Renaud", email = "rchretien@outlook.be" },
@@ -32,11 +32,11 @@ dependencies = [
 ]
 
 [project.urls]  # https://packaging.python.org/en/latest/specifications/well-known-project-urls/#well-known-labels
-homepage = "https://rchretien.github.com/fridge-app"
-source = "https://rchretien.github.com/fridge-app"
-releasenotes = "https://rchretien.github.com/fridge-app/releases"
-documentation = "https://rchretien.github.io/fridge-app"
-issues = "https://rchretien.github.com/fridge-app/issues"
+homepage = "https://github.com/rchretien/frozen-vault"
+source = "https://github.com/rchretien/frozen-vault"
+releasenotes = "https://github.com/rchretien/frozen-vault/releases"
+documentation = "https://rchretien.github.io/frozen-vault"
+issues = "https://github.com/rchretien/frozen-vault/issues"
 
 [dependency-groups]  # https://docs.astral.sh/uv/concepts/projects/dependencies/#development-dependencies
 dev = [
@@ -143,7 +143,7 @@ type = "simple"
         --host $host \
         --port $port \
         --reload \
-        fridge_app_backend.api.app:app
+        frozen_vault_backend.api.app:app
     } else {
       gunicorn \
         --access-logfile - \
@@ -155,7 +155,7 @@ type = "simple"
         --worker-class uvicorn.workers.UvicornWorker \
         --worker-tmp-dir /dev/shm \
         --workers 2 \
-        fridge_app_backend.api.app:app
+        frozen_vault_backend.api.app:app
     } fi
     """
 

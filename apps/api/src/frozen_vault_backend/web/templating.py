@@ -6,7 +6,7 @@ from typing import Any
 from fastapi.templating import Jinja2Templates
 from starlette.requests import Request
 
-from fridge_app_backend.config import ROOT_DIR, config
+from frozen_vault_backend.config import ROOT_DIR, config
 
 FRONTEND_DIR = ROOT_DIR.parent / "frontend"
 STATIC_DIR = FRONTEND_DIR / "static"

@@ -1,10 +1,11 @@
-# Fridge App Workspace
+# FrozenVault
 
-This repository is now structured as a workspace that can host multiple apps.
+FrozenVault tracks fridge inventory, storage locations, and expiry dates.
 
 ## Current apps
 
-- `apps/api`: FastAPI backend for the fridge inventory application
+- `apps/api`: FastAPI backend and server-rendered web application
+- `apps/frontend`: frontend templates and static assets
 
 ## Backend development
 
@@ -73,7 +74,7 @@ Run a quick post-deploy check for the HTTPS proxy, static assets, and mixed-cont
 ./scripts/pi-check.sh
 ```
 
-The production stack serves the app through Nginx at `/fridge-app`. Keep the Raspberry Pi behind
+The production stack serves the app through Nginx at `/frozen-vault`. Keep the Raspberry Pi behind
 your router firewall and do not configure public port forwarding if the app should remain private.
 
 Tailscale is optional. It is a private WireGuard-based VPN that lets your own devices reach the Pi
@@ -86,6 +87,5 @@ Within the Dev Container this is equivalent to:
 ```sh
 poe api
 ```
-- The backend Python package name remains `fridge_app_backend`.
-- No frontend app has been added yet; the workspace is only prepared for it.
+- The backend Python package is `frozen_vault_backend`.
 - Backend-specific setup, including PostgreSQL and Alembic instructions, lives in `apps/api/README.md`.

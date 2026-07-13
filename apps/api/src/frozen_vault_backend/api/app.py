@@ -13,17 +13,17 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.status import HTTP_400_BAD_REQUEST
 
-from fridge_app_backend.api.routes.inventory_routes import inventory_router
-from fridge_app_backend.api.routes.utils_routes import utils_router
-from fridge_app_backend.config import config
-from fridge_app_backend.exceptions import (
+from frozen_vault_backend.api.routes.inventory_routes import inventory_router
+from frozen_vault_backend.api.routes.utils_routes import utils_router
+from frozen_vault_backend.config import config
+from frozen_vault_backend.exceptions import (
     InvalidExpiryDateError,
     InvalidProductLocationError,
     InvalidProductTypeError,
 )
-from fridge_app_backend.orm.database import initialise_db
-from fridge_app_backend.web.routes import inventory_web_router
-from fridge_app_backend.web.templating import STATIC_DIR
+from frozen_vault_backend.orm.database import initialise_db
+from frozen_vault_backend.web.routes import inventory_web_router
+from frozen_vault_backend.web.templating import STATIC_DIR
 
 logger = logging.getLogger(__name__)
 logger.info("Running COMMIT", extra={"commit": config.commit_sha})

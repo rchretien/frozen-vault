@@ -1,7 +1,7 @@
 services:
   nginx:
     image: nginx:alpine
-    container_name: fridge-app-nginx
+    container_name: frozen-vault-nginx
     depends_on:
       api:
         condition: service_healthy
@@ -15,16 +15,16 @@ services:
     restart: unless-stopped
 
   api:
-    image: ${IMAGE_REF:-ghcr.io/rchretien/fridge-app:latest}
-    container_name: fridge-app-api
+    image: ${IMAGE_REF:-ghcr.io/rchretien/frozen-vault:latest}
+    container_name: frozen-vault-api
     env_file:
       - .env-prod
     environment:
-      API_ROOT_PATH: /fridge-app
+      API_ROOT_PATH: /frozen-vault
       DEPLOYED_AT: ${DEPLOYED_AT:-unknown}
       FORWARDED_ALLOW_IPS: "*"
       IMAGE_DIGEST: ${IMAGE_DIGEST:-unknown}
-      IMAGE_REF: ${IMAGE_REF:-ghcr.io/rchretien/fridge-app:latest}
+      IMAGE_REF: ${IMAGE_REF:-ghcr.io/rchretien/frozen-vault:latest}
       PYTHONPATH: /workspace/app/apps/api/src
     entrypoint: [ "/workspace/app/.venv/bin/poe" ]
     command: [ "api-prod", "--host", "0.0.0.0", "--port", "8000" ]

@@ -6,8 +6,8 @@ from collections.abc import Generator
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, sessionmaker
 
-from fridge_app_backend.config import config, create_database_engine
-from fridge_app_backend.orm.models.db_models import (
+from frozen_vault_backend.config import config, create_database_engine
+from frozen_vault_backend.orm.models.db_models import (
     Base,
     ProductLocation,
     ProductType,

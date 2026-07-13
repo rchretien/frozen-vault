@@ -1,8 +1,8 @@
-"""Test Fridge App backend."""
+"""Test FrozenVault backend."""
 
-import fridge_app_backend
+import frozen_vault_backend
 
 
 def test_import() -> None:
     """Test that the app can be imported."""
-    assert isinstance(fridge_app_backend.__name__, str)
+    assert isinstance(frozen_vault_backend.__name__, str)
