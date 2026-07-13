@@ -16,7 +16,7 @@
     </form>
   </div>
 
-  <article class="product-card {{ expiry_status(product.expiry_date) }} tone-{{ type_visual.tone }}" data-swipe-surface>
+  <article class="product-card {{ expiry_status(product.best_quality_until) }} tone-{{ type_visual.tone }}" data-swipe-surface>
     <a class="product-card-main" href="{{ edit_url }}" aria-label="Edit {{ product.product_name }}">
       <div class="product-card-header">
         <div class="product-card-identity">
@@ -32,9 +32,9 @@
           <h3>{{ product.product_name }}</h3>
           <p class="product-inline-meta">{{ product.quantity }} {{ product_unit_label(product.unit) }}{% if product.description %} · {{ product.description }}{% endif %}</p>
         </div>
-        <div class="expiry-sticker {{ expiry_status(product.expiry_date) }}">
-          <span class="expiry-sticker-label">{{ expiry_status_label(product.expiry_date) }}</span>
-          <strong>{{ format_date_display(product.expiry_date) }}</strong>
+        <div class="expiry-sticker {{ expiry_status(product.best_quality_until) }}">
+          <span class="expiry-sticker-label">{{ expiry_status_label(product.best_quality_until) }}</span>
+          <strong>{{ format_date_display(product.best_quality_until) }}</strong>
         </div>
       </div>
     </a>

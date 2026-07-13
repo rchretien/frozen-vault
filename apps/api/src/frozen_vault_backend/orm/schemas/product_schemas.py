@@ -8,6 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from frozen_vault_backend.config import config
 from frozen_vault_backend.exceptions import InvalidExpiryDateError
+from frozen_vault_backend.orm.constants import FREEZER_STORAGE_DAYS
 from frozen_vault_backend.orm.crud.base_crud import PaginatedResponse
 from frozen_vault_backend.orm.enums.base_enums import (
     ProductLocationEnum,
@@ -48,6 +49,16 @@ def _ensure_brussels_timezone(value: datetime) -> datetime:
     if value.tzinfo is None or value.tzinfo.utcoffset(value) is None:
         return tz.localize(value)
     return value.astimezone(tz)
+
+
+def calculate_best_quality_until(
+    *, creation_date: datetime, product_type: ProductTypeEnum
+) -> datetime:
+    """Return category quality guidance from the date the product was stored."""
+    return config.brussels_tz.normalize(
+        _ensure_brussels_timezone(creation_date)
+        + timedelta(days=FREEZER_STORAGE_DAYS[product_type])
+    )
 
 
 class ProductBase(BaseModel):
@@ -132,12 +143,11 @@ class ProductUpdate(BaseModel):
         """Validate update data against existing product."""
         if self.expiry_date is not None:
             expiry_date = _ensure_brussels_timezone(self.expiry_date)
-            creation_date = _ensure_brussels_timezone(existing_product.creation_date)
+            existing_expiry = _ensure_brussels_timezone(existing_product.expiry_date)
 
-            if expiry_date < creation_date:
+            if expiry_date != existing_expiry:
                 raise InvalidExpiryDateError(
-                    f"Expiry date ({expiry_date.isoformat()}) cannot be earlier than "
-                    f"creation date ({creation_date.isoformat()})"
+                    f"Vendor expiry date ({existing_expiry.isoformat()}) cannot be changed"
                 )
 
 
@@ -147,6 +157,11 @@ class ProductRead(ProductBase):
     id: int = Field(..., title="Product ID", ge=1)
     creation_date: datetime = Field(
         ..., title="Product creation date", description="Product creation date"
+    )
+    best_quality_until: datetime = Field(
+        ...,
+        title="Best quality until",
+        description="Category quality date calculated from creation",
     )
     image_location: str = Field(
         ...,
@@ -161,16 +176,23 @@ class ProductRead(ProductBase):
     @classmethod
     def from_model(cls, model: Product) -> Self:
         """Create a ProductRead instance from a Product model instance."""
+        creation_date = _ensure_brussels_timezone(model.creation_date)
+        expiry_date = _ensure_brussels_timezone(model.expiry_date)
+        product_location = ProductLocationEnum(model.product_location.name)
+        product_type = ProductTypeEnum(model.product_type.name)
         return cls(
             id=model.id,
             product_name=model.name,
             description=model.description,
             quantity=model.quantity,
             unit=ProductUnitEnum(model.unit),
-            creation_date=_ensure_brussels_timezone(model.creation_date),
-            expiry_date=_ensure_brussels_timezone(model.expiry_date),
-            product_location=ProductLocationEnum(model.product_location.name),
-            product_type=ProductTypeEnum(model.product_type.name),
+            creation_date=creation_date,
+            expiry_date=expiry_date,
+            best_quality_until=calculate_best_quality_until(
+                creation_date=creation_date, product_type=product_type
+            ),
+            product_location=product_location,
+            product_type=product_type,
             image_location=model.image_location,
         )
 

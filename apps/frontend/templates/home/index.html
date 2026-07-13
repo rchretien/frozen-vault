@@ -96,7 +96,7 @@
           <div class="home-list">
             {% for product in urgent_preview %}
               {% set type_visual = product_type_visual(product.product_type) %}
-              {% set product_status = expiry_status(product.expiry_date) %}
+              {% set product_status = expiry_status(product.best_quality_until) %}
               <a class="home-list-row tone-{{ type_visual.tone }}" href="{{ url_path_for(request, 'edit_product_page', product_id=product.id) }}?return_to=/">
                 <span class="product-card-icon home-list-icon" aria-hidden="true">
                   {% include 'partials/_product_type_icon.html' %}
@@ -105,7 +105,7 @@
                   <strong>{{ product.product_name }}</strong>
                   <p class="muted-text">{{ product_location_label(product.product_location) }} · {{ product.quantity }} {{ product_unit_label(product.unit) }}</p>
                 </div>
-                <span class="inventory-status-badge {{ product_status }}">{{ expiry_status_label(product.expiry_date) }}</span>
+                <span class="inventory-status-badge {{ product_status }}">{{ expiry_status_label(product.best_quality_until) }}</span>
               </a>
             {% endfor %}
           </div>
@@ -143,7 +143,7 @@
                 </span>
                 <div class="home-list-copy">
                   <strong>{{ product.product_name }}</strong>
-                  <p class="muted-text">{{ product_type_visual(product.product_type).label }} · expires {{ format_date_display(product.expiry_date) }}</p>
+                  <p class="muted-text">{{ product_type_visual(product.product_type).label }} · best quality {{ format_date_display(product.best_quality_until) }}</p>
                 </div>
                 {% set icon_name = 'pencil-square' %}
                 {% set icon_class = 'app-icon app-icon-sm home-row-action' %}

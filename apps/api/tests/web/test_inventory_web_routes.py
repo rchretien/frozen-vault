@@ -8,11 +8,13 @@ import pytest
 from fastapi.testclient import TestClient
 
 from frozen_vault_backend.config import config
+from frozen_vault_backend.orm.database import SessionLocal
 from frozen_vault_backend.orm.enums.base_enums import (
     ProductLocationEnum,
     ProductTypeEnum,
     ProductUnitEnum,
 )
+from frozen_vault_backend.orm.models.db_models import Product
 
 
 def _html_form_payload(**overrides: Any) -> dict[str, str]:
@@ -40,26 +42,6 @@ def _create_product_through_api(client: TestClient, product_name: str) -> int:
         "quantity": 1,
         "unit": ProductUnitEnum.BOXES.value,
         "expiry_date": (datetime.now(tz=config.brussels_tz) + timedelta(days=4)).isoformat(),
-        "product_location": ProductLocationEnum.REFRIGERATOR.value,
-        "product_type": ProductTypeEnum.FRUIT.value,
-    }
-    response = client.post("/inventory/create", json=payload)
-    assert response.status_code == httpx.codes.CREATED
-    return response.json()["product_id"]
-
-
-def _create_product_through_api_with_expiry(
-    client: TestClient, product_name: str, expires_in_days: int
-) -> int:
-    """Create a product with a relative expiry date and return its identifier."""
-    payload = {
-        "product_name": product_name,
-        "description": f"{product_name} description",
-        "quantity": 1,
-        "unit": ProductUnitEnum.BOXES.value,
-        "expiry_date": (
-            datetime.now(tz=config.brussels_tz) + timedelta(days=expires_in_days)
-        ).isoformat(),
         "product_location": ProductLocationEnum.REFRIGERATOR.value,
         "product_type": ProductTypeEnum.FRUIT.value,
     }
@@ -102,9 +84,14 @@ def test_web_pages_render_meta_descriptions(client: TestClient) -> None:
 
 def test_home_page_shows_urgent_items_outside_recent_preview(client: TestClient) -> None:
     """The dashboard urgent list should not be limited to the newest products."""
-    _create_product_through_api_with_expiry(client, "Old urgent cream", 1)
+    product_id = _create_product_through_api(client, "Old urgent cream")
+    with SessionLocal.begin() as session:
+        product = session.get(Product, product_id)
+        assert product is not None
+        product.creation_date = datetime.now(tz=config.brussels_tz) - timedelta(days=89)
+
     for index in range(5):
-        _create_product_through_api_with_expiry(client, f"New fresh item {index}", 10)
+        _create_product_through_api(client, f"New fresh item {index}")
 
     response = client.get("/")
 
@@ -206,6 +193,26 @@ def test_inventory_soon_page_renders_urgency_screen(client: TestClient) -> None:
     assert "Expiring soon" in response.text
     assert "Clear the urgent queue." in response.text
     assert "Focus on expired products and items that should be used" in response.text
+
+
+def test_inventory_soon_page_uses_quality_date_for_refrigerator(client: TestClient) -> None:
+    """A near vendor expiry should not make a newly refrigerated product urgent."""
+    payload = {
+        "product_name": "Fresh fruit",
+        "description": "Recently stored",
+        "quantity": 1,
+        "unit": ProductUnitEnum.BOXES.value,
+        "expiry_date": (datetime.now(tz=config.brussels_tz) + timedelta(days=1)).isoformat(),
+        "product_location": ProductLocationEnum.REFRIGERATOR.value,
+        "product_type": ProductTypeEnum.FRUIT.value,
+    }
+    create_response = client.post("/inventory/create", json=payload)
+    assert create_response.status_code == httpx.codes.CREATED
+
+    response = client.get("/web/inventory/soon")
+
+    assert response.status_code == httpx.codes.OK
+    assert "Fresh fruit" not in response.text
 
 
 def test_more_page_renders_utility_screen(client: TestClient) -> None:
@@ -341,6 +348,8 @@ def test_edit_product_page_renders_existing_values(client: TestClient) -> None:
     assert response.status_code == httpx.codes.OK
     assert "Edit Blueberries" in response.text
     assert 'value="Blueberries"' in response.text
+    assert 'name="expiry_date_date" type="date"' in response.text
+    assert "disabled" in response.text
     assert 'type="time"' not in response.text
 
 
@@ -356,6 +365,24 @@ def test_update_product_page_persists_changes(client: TestClient) -> None:
     assert "Product updated successfully" in response.text
     assert "Skyr" in response.text
     assert "Cottage Cheese" not in response.text
+
+
+def test_update_product_page_ignores_vendor_expiry_change(client: TestClient) -> None:
+    """HTML updates should preserve the vendor expiry stored at creation."""
+    product_id = _create_product_through_api(client, "Frozen berries")
+    original_expiry = client.get("/inventory/list").json()["products"][0]["expiry_date"]
+    payload = _html_form_payload(
+        product_name="Frozen berries",
+        expiry_date=(datetime.now(tz=config.brussels_tz) + timedelta(days=90)).isoformat(),
+        expiry_date_date=(datetime.now(tz=config.brussels_tz) + timedelta(days=90)).strftime(
+            "%Y-%m-%d"
+        ),
+    )
+
+    response = client.post(f"/web/inventory/{product_id}", data=payload)
+
+    assert response.status_code == httpx.codes.OK
+    assert client.get("/inventory/list").json()["products"][0]["expiry_date"] == original_expiry
 
 
 def test_delete_product_page_removes_product(client: TestClient) -> None:

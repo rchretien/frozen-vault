@@ -82,14 +82,14 @@
           {% set icon_name = 'calendar-days' %}
           {% set icon_class = 'app-icon app-icon-sm' %}
           {% include 'partials/_heroicon.html' %}
-          <span>Expiry</span>
+          <span>Vendor expiry</span>
         </h3>
       </div>
 
       <div class="control-grid compact-grid">
         <label class="field-group">
-          <span>Expiry date</span>
-          <input name="expiry_date_date" type="date" value="{{ form_data.expiry_date_date }}" required autocomplete="off" {% if errors.expiry_date %}aria-invalid="true" aria-describedby="field-error-expiry-date"{% endif %}>
+          <span>Vendor expiry date</span>
+          <input name="expiry_date_date" type="date" value="{{ form_data.expiry_date_date }}" {% if is_edit %}disabled{% else %}required{% endif %} autocomplete="off" {% if errors.expiry_date %}aria-invalid="true" aria-describedby="field-error-expiry-date"{% endif %}>
         </label>
       </div>
 

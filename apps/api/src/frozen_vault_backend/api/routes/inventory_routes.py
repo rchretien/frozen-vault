@@ -58,7 +58,7 @@ async def get_product_list(
 ) -> ProductReadList:
     """Get all products."""
     return ProductReadList.from_paginated_response(
-        paginated_response=product_crud.get_multi_paginated(
+        paginated_response=product_crud.get_multi_filtered_paginated(
             session=session, limit=limit, offset=offset, ascending=ascending, order_by=order_by
         )
     )
