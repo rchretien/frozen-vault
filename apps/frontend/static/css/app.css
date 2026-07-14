@@ -897,6 +897,39 @@ dd {
   gap: 0.45rem;
 }
 
+[data-product-name-field] {
+  position: relative;
+}
+
+.product-name-suggestions {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  left: 0;
+  max-height: 14rem;
+  overflow-y: auto;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+}
+
+.product-name-suggestions[hidden] {
+  display: none;
+}
+
+.product-name-suggestion {
+  padding: 0.75rem 0.9rem;
+  cursor: pointer;
+}
+
+.product-name-suggestion:hover,
+.product-name-suggestion.is-active {
+  background: var(--primary-soft);
+  color: var(--primary-strong);
+}
+
 .field-group span {
   font-weight: 600;
 }

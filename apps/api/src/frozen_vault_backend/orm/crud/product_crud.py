@@ -75,7 +75,11 @@ class CRUDProduct(CRUDBase[Product, ProductCreate, ProductUpdate]):
     def get_names_starting_with(self, product_name: str, session: Session) -> list[str]:
         """Get product names starting with a specific string."""
         scalar_result = session.scalars(
-            select(Product.name).where(Product.name.ilike(f"{product_name}%"))
+            select(Product.name)
+            .where(Product.name.istartswith(product_name, autoescape=True))
+            .group_by(Product.name)
+            .order_by(func.lower(Product.name), Product.name)
+            .limit(10)
         )
         return list(scalar_result.all())
 

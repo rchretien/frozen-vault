@@ -183,17 +183,36 @@ def test_create_product_persists_unit_value(client: TestClient) -> None:
     assert raw_unit == ProductUnitEnum.BOXES.value
 
 
-def test_get_names_starting_with_returns_sentence_case(client: TestClient) -> None:
-    """The /startswith endpoint should normalise product names to sentence case."""
-    payload = _product_payload(product_name="spinach")
-    create_response = client.post("/inventory/create", json=payload)
-    assert create_response.status_code == httpx.codes.CREATED
+def test_get_names_starting_with_returns_distinct_sorted_names(client: TestClient) -> None:
+    """Autocomplete should preserve spelling and suppress duplicate inventory names."""
+    for product_name in ["BBQ Sauce", "Baba Ganoush", "BBQ Sauce"]:
+        response = client.post(
+            "/inventory/create", json=_product_payload(product_name=product_name)
+        )
+        assert response.status_code == httpx.codes.CREATED
 
-    names_response = client.get("/inventory/startswith", params={"name": "sp"})
-    assert names_response.status_code == httpx.codes.OK
+    response = client.get("/inventory/startswith", params={"name": "b"})
 
-    body = names_response.json()
-    assert body["names"] == [{"name": "Spinach"}]
+    assert response.status_code == httpx.codes.OK
+    assert response.json()["names"] == [{"name": "Baba Ganoush"}, {"name": "BBQ Sauce"}]
+
+
+def test_get_names_starting_with_escapes_wildcards_and_limits_results(client: TestClient) -> None:
+    """Autocomplete text should be literal and return at most ten suggestions."""
+    product_names = ["% Discount"] + [f"Item {index:02}" for index in range(11)]
+    for product_name in product_names:
+        response = client.post(
+            "/inventory/create", json=_product_payload(product_name=product_name)
+        )
+        assert response.status_code == httpx.codes.CREATED
+
+    wildcard_response = client.get("/inventory/startswith", params={"name": "%"})
+    limited_response = client.get("/inventory/startswith", params={"name": "item"})
+
+    assert wildcard_response.status_code == httpx.codes.OK
+    assert wildcard_response.json()["names"] == [{"name": "% Discount"}]
+    assert limited_response.status_code == httpx.codes.OK
+    assert len(limited_response.json()["names"]) == 10
 
 
 def test_update_product_rejects_vendor_expiry_change(client: TestClient) -> None:
