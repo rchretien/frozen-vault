@@ -5,7 +5,7 @@
     action="{{ filter_action_url }}"
     method="get"
   >
-    <label class="field-group search-group">
+    <label class="field-group search-group" data-product-name-field>
       <span>Search products</span>
       <div class="input-with-icon">
         {% set icon_name = 'magnifying-glass' %}
@@ -16,15 +16,23 @@
           name="q"
           value="{{ filters.q }}"
           placeholder="Start typing a product name…"
+          maxlength="50"
           autocomplete="off"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-controls="product-name-suggestions"
+          aria-expanded="false"
+          data-product-name-autocomplete
+          data-autocomplete-url="{{ url_path_for(request, 'get_product_names_starting_with') }}"
           hx-get="{{ url_path_for(request, 'render_inventory_list_fragment') }}"
-          hx-trigger="keyup changed delay:300ms, search"
+          hx-trigger="keyup changed delay:300ms, search, change"
           hx-target="#inventory-results"
           hx-swap="outerHTML"
           hx-include="#inventory-controls"
           hx-push-url="true"
         >
       </div>
+      <div id="product-name-suggestions" class="product-name-suggestions" role="listbox" hidden></div>
     </label>
 
     <div class="urgency-tabs" aria-label="Inventory scope">

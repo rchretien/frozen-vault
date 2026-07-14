@@ -25,12 +25,6 @@ class ProductName(BaseModel):
         ..., title="Product name", min_length=1, max_length=50, description="Product name"
     )
 
-    @field_validator("name")
-    @classmethod
-    def sentence_case_name(cls, value: str) -> str:
-        """Convert the product name to sentence case."""
-        return value.capitalize()
-
 
 class ProductNameList(BaseModel):
     """Data model for a list of product names."""

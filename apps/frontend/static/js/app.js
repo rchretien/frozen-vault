@@ -10,6 +10,150 @@ document.addEventListener("submit", (event) => {
   }
 });
 
+const AUTOCOMPLETE_DELAY = 200;
+let autocompleteTimer = null;
+let autocompleteRequest = null;
+
+function getProductNameSuggestions(input) {
+  return document.getElementById(input.getAttribute("aria-controls"));
+}
+
+function closeProductNameSuggestions(input) {
+  const suggestions = getProductNameSuggestions(input);
+  if (suggestions) {
+    suggestions.hidden = true;
+    suggestions.replaceChildren();
+  }
+  input.setAttribute("aria-expanded", "false");
+  input.removeAttribute("aria-activedescendant");
+}
+
+function selectProductName(input, option) {
+  input.value = option.dataset.productName;
+  closeProductNameSuggestions(input);
+  input.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
+function renderProductNameSuggestions(input, names) {
+  const suggestions = getProductNameSuggestions(input);
+  if (!suggestions) {
+    return;
+  }
+
+  suggestions.replaceChildren(
+    ...names.map(({ name }, index) => {
+      const option = document.createElement("div");
+      option.id = `${suggestions.id}-option-${index}`;
+      option.className = "product-name-suggestion";
+      option.dataset.productName = name;
+      option.setAttribute("role", "option");
+      option.textContent = name;
+      return option;
+    })
+  );
+  suggestions.hidden = names.length === 0;
+  input.setAttribute("aria-expanded", String(names.length > 0));
+}
+
+document.addEventListener("input", (event) => {
+  const input = event.target;
+  if (!(input instanceof HTMLInputElement) || !input.matches("[data-product-name-autocomplete]")) {
+    return;
+  }
+
+  window.clearTimeout(autocompleteTimer);
+  autocompleteRequest?.abort();
+  closeProductNameSuggestions(input);
+
+  const query = input.value.trim();
+  if (!query) {
+    return;
+  }
+
+  autocompleteTimer = window.setTimeout(async () => {
+    const controller = new AbortController();
+    autocompleteRequest = controller;
+
+    try {
+      const url = new URL(input.dataset.autocompleteUrl, window.location.origin);
+      url.searchParams.set("name", query);
+      const response = await fetch(url, { signal: controller.signal });
+      if (!response.ok) {
+        return;
+      }
+
+      const body = await response.json();
+      if (input.value.trim() !== query) {
+        return;
+      }
+
+      renderProductNameSuggestions(input, body.names);
+    } catch (error) {
+      if (error.name !== "AbortError") {
+        closeProductNameSuggestions(input);
+      }
+    } finally {
+      if (autocompleteRequest === controller) {
+        autocompleteRequest = null;
+      }
+    }
+  }, AUTOCOMPLETE_DELAY);
+});
+
+document.addEventListener("keydown", (event) => {
+  const input = event.target;
+  if (!(input instanceof HTMLInputElement) || !input.matches("[data-product-name-autocomplete]")) {
+    return;
+  }
+
+  const options = [...(getProductNameSuggestions(input)?.children ?? [])];
+  const activeIndex = options.findIndex((option) => option.getAttribute("aria-selected") === "true");
+
+  if (event.key === "Escape") {
+    closeProductNameSuggestions(input);
+    return;
+  }
+  if (event.key === "Enter" && activeIndex >= 0) {
+    event.preventDefault();
+    selectProductName(input, options[activeIndex]);
+    return;
+  }
+  if (!options.length || !["ArrowDown", "ArrowUp"].includes(event.key)) {
+    return;
+  }
+
+  event.preventDefault();
+  const nextIndex =
+    event.key === "ArrowDown"
+      ? (activeIndex + 1) % options.length
+      : (activeIndex - 1 + options.length) % options.length;
+  options.forEach((option, index) => {
+    option.setAttribute("aria-selected", String(index === nextIndex));
+    option.classList.toggle("is-active", index === nextIndex);
+  });
+  input.setAttribute("aria-activedescendant", options[nextIndex].id);
+});
+
+document.addEventListener("pointerdown", (event) => {
+  const option = event.target.closest("[data-product-name]");
+  if (option) {
+    event.preventDefault();
+    const input = option
+      .closest("[data-product-name-field]")
+      ?.querySelector("[data-product-name-autocomplete]");
+    if (input) {
+      selectProductName(input, option);
+    }
+    return;
+  }
+
+  document.querySelectorAll("[data-product-name-autocomplete]").forEach((input) => {
+    if (!input.closest("[data-product-name-field]")?.contains(event.target)) {
+      closeProductNameSuggestions(input);
+    }
+  });
+});
+
 const SWIPE_REVEAL_WIDTH = 108;
 const SWIPE_OPEN_THRESHOLD = 54;
 const SWIPE_INTENT_THRESHOLD = 10;

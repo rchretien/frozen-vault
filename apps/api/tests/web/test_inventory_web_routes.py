@@ -124,6 +124,19 @@ def test_inventory_page_renders_mobile_controls(client: TestClient) -> None:
     assert "Tools" in response.text
 
 
+def test_inventory_search_enables_product_name_autocomplete(client: TestClient) -> None:
+    """The inventory search should use the shared product-name autocomplete."""
+    response = client.get("/web/inventory")
+
+    assert response.status_code == httpx.codes.OK
+    assert 'name="q"' in response.text
+    assert "data-product-name-autocomplete" in response.text
+    assert 'data-autocomplete-url="/inventory/startswith"' in response.text
+    assert 'aria-autocomplete="list"' in response.text
+    assert 'class="product-name-suggestions" role="listbox" hidden' in response.text
+    assert 'hx-trigger="keyup changed delay:300ms, search, change"' in response.text
+
+
 def test_inventory_mobile_cards_are_clickable_and_swipe_deletable(client: TestClient) -> None:
     """Mobile inventory cards should expose edit-on-card and swipe delete affordances."""
     product_id = _create_product_through_api(client, "Blueberries")
@@ -260,6 +273,10 @@ def test_new_product_page_renders_form(client: TestClient) -> None:
     assert "Add item details, quantity, expiry, and storage." in response.text
     assert "Create product" in response.text
     assert 'name="product_name"' in response.text
+    assert "data-product-name-autocomplete" in response.text
+    assert 'data-autocomplete-url="/inventory/startswith"' in response.text
+    assert 'aria-autocomplete="list"' in response.text
+    assert 'class="product-name-suggestions" role="listbox" hidden' in response.text
     assert 'type="date"' in response.text
     assert 'type="time"' not in response.text
 
@@ -348,6 +365,8 @@ def test_edit_product_page_renders_existing_values(client: TestClient) -> None:
     assert response.status_code == httpx.codes.OK
     assert "Edit Blueberries" in response.text
     assert 'value="Blueberries"' in response.text
+    assert "data-product-name-autocomplete" in response.text
+    assert 'class="product-name-suggestions" role="listbox" hidden' in response.text
     assert 'name="expiry_date_date" type="date"' in response.text
     assert "disabled" in response.text
     assert 'type="time"' not in response.text
