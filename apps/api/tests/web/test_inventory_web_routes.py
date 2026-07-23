@@ -2,6 +2,7 @@
 
 from datetime import datetime, timedelta
 from typing import Any
+from urllib.parse import parse_qs, urlparse
 
 import httpx
 import pytest
@@ -34,16 +35,27 @@ def _html_form_payload(**overrides: Any) -> dict[str, str]:
     return payload
 
 
-def _create_product_through_api(client: TestClient, product_name: str) -> int:
+def _create_product_through_api(
+    client: TestClient,
+    product_name: str,
+    product_location: str = ProductLocationEnum.REFRIGERATOR.value,
+    *,
+    quantity: int = 1,
+    unit: str = ProductUnitEnum.BOXES.value,
+    product_type: str = ProductTypeEnum.FRUIT.value,
+    expiry_date: datetime | None = None,
+) -> int:
     """Create a product through the JSON API and return its identifier."""
     payload = {
         "product_name": product_name,
         "description": f"{product_name} description",
-        "quantity": 1,
-        "unit": ProductUnitEnum.BOXES.value,
-        "expiry_date": (datetime.now(tz=config.brussels_tz) + timedelta(days=4)).isoformat(),
-        "product_location": ProductLocationEnum.REFRIGERATOR.value,
-        "product_type": ProductTypeEnum.FRUIT.value,
+        "quantity": quantity,
+        "unit": unit,
+        "expiry_date": (
+            expiry_date or datetime.now(tz=config.brussels_tz) + timedelta(days=4)
+        ).isoformat(),
+        "product_location": product_location,
+        "product_type": product_type,
     }
     response = client.post("/inventory/create", json=payload)
     assert response.status_code == httpx.codes.CREATED
@@ -59,6 +71,123 @@ def test_home_page_renders_welcome_dashboard(client: TestClient) -> None:
     assert "Open inventory" in response.text
     assert 'id="inventory-controls"' not in response.text
     assert "Home" in response.text
+
+
+def test_home_page_summarizes_all_freezers(client: TestClient) -> None:
+    """The dashboard should preview combined analytics for every storage location."""
+    _create_product_through_api(
+        client,
+        "Berries",
+        ProductLocationEnum.BIG_FREEZER.value,
+        quantity=1500,
+        unit=ProductUnitEnum.GRAM.value,
+    )
+    _create_product_through_api(client, "Peas", ProductLocationEnum.SMALL_FREEZER.value)
+    _create_product_through_api(client, "Milk")
+
+    response = client.get("/")
+
+    assert response.status_code == httpx.codes.OK
+    assert "All Freezers" in response.text
+    assert 'aria-label="Tracked entries: 3"' in response.text
+    assert 'aria-label="Known weight: 1.5 kg"' in response.text
+    assert 'href="/web/analytics"' in response.text
+
+
+def test_freezer_analytics_page_renders_scoped_unit_safe_charts(client: TestClient) -> None:
+    """Freezer analytics should render total and scoped metrics without mixing units."""
+    expiry_date = datetime.now(tz=config.brussels_tz) + timedelta(days=4)
+    _create_product_through_api(
+        client,
+        "Chicken Wings",
+        ProductLocationEnum.BIG_FREEZER.value,
+        quantity=1500,
+        unit=ProductUnitEnum.GRAM.value,
+        product_type=ProductTypeEnum.POULTRY.value,
+        expiry_date=expiry_date,
+    )
+    _create_product_through_api(
+        client,
+        "chicken wing",
+        ProductLocationEnum.BIG_FREEZER.value,
+        quantity=500,
+        unit=ProductUnitEnum.GRAM.value,
+        product_type=ProductTypeEnum.POULTRY.value,
+        expiry_date=expiry_date,
+    )
+    _create_product_through_api(
+        client,
+        "Peas",
+        ProductLocationEnum.BIG_FREEZER.value,
+        quantity=2,
+        unit=ProductUnitEnum.BOXES.value,
+        product_type=ProductTypeEnum.VEGETABLE.value,
+        expiry_date=expiry_date + timedelta(days=1),
+    )
+    _create_product_through_api(
+        client,
+        "Stock",
+        ProductLocationEnum.SMALL_FREEZER.value,
+        quantity=3,
+        unit=ProductUnitEnum.BOTTLES.value,
+        product_type=ProductTypeEnum.LIQUID.value,
+        expiry_date=expiry_date + timedelta(days=1),
+    )
+    _create_product_through_api(
+        client,
+        "Milk",
+        ProductLocationEnum.REFRIGERATOR.value,
+        quantity=300,
+        unit=ProductUnitEnum.GRAM.value,
+        product_type=ProductTypeEnum.DAIRY.value,
+        expiry_date=expiry_date + timedelta(days=2),
+    )
+
+    response = client.get("/web/analytics")
+
+    assert response.status_code == httpx.codes.OK
+    assert "All Freezers overview" in response.text
+    assert '<dt class="metric-label">Tracked entries</dt>' in response.text
+    assert '<dt class="metric-label">Known weight</dt>' in response.text
+    assert '<dt class="metric-label">Boxes</dt>' in response.text
+    assert '<dt class="metric-label">Bottles</dt>' in response.text
+    assert 'aria-label="Category quantity distribution"' in response.text
+    assert 'aria-label="Product quantity distribution"' in response.text
+    assert 'aria-label="Expiry date distribution"' in response.text
+    assert 'aria-label="Product count"' in response.text
+    assert '<div class="metric-pill analytics-kpi is-primary" role="group"' not in response.text
+    assert "Poultry" in response.text
+    assert "Chicken Wings" in response.text
+    assert response.text.count('<details class="analytics-bar-row') >= 2
+    assert "Made of" in response.text
+    assert "chicken wing" in response.text
+    assert "Big Freezer · expires" in response.text
+    assert "2 kg" in response.text
+    assert "Vegetable" in response.text
+    assert "Liquid" in response.text
+    assert "Dairy" in response.text
+    assert 'href="/web/analytics?scope=refrigerator"' in response.text
+    assert "Best-quality horizon" not in response.text
+    assert "Needs attention" not in response.text
+
+    big_freezer_response = client.get("/web/analytics", params={"scope": "big-freezer"})
+
+    assert big_freezer_response.status_code == httpx.codes.OK
+    assert "Big Freezer overview" in big_freezer_response.text
+    assert "<dd>3</dd>" in big_freezer_response.text
+    assert "<dd>0</dd>" in big_freezer_response.text
+
+    small_freezer_response = client.get("/web/analytics", params={"scope": "small-freezer"})
+
+    assert small_freezer_response.status_code == httpx.codes.OK
+    assert "Small Freezer overview" in small_freezer_response.text
+    assert "<dd>1</dd>" in small_freezer_response.text
+
+    refrigerator_response = client.get("/web/analytics", params={"scope": "refrigerator"})
+
+    assert refrigerator_response.status_code == httpx.codes.OK
+    assert "Refrigerator overview" in refrigerator_response.text
+    assert "300 g" in refrigerator_response.text
 
 
 def test_home_page_uses_path_only_local_urls(client: TestClient) -> None:
@@ -152,6 +281,18 @@ def test_inventory_mobile_cards_are_clickable_and_swipe_deletable(client: TestCl
     assert 'tabindex="-1"' in response.text
     assert "Tap to edit" not in response.text
     assert "inventory-table" not in response.text
+
+
+def test_inventory_cards_render_desktop_edit_and_delete_actions(client: TestClient) -> None:
+    """Desktop inventory cards should expose conventional edit and delete actions."""
+    product_id = _create_product_through_api(client, "Blueberries")
+
+    response = client.get("/web/inventory")
+
+    assert response.status_code == httpx.codes.OK
+    assert 'class="card-actions utility-actions desktop-card-actions"' in response.text
+    assert f'href="/web/inventory/{product_id}/edit?return_to=' in response.text
+    assert 'class="danger-button desktop-delete-button"' in response.text
 
 
 def test_inventory_filters_push_state_to_url_and_keep_filter_links(client: TestClient) -> None:
@@ -279,6 +420,8 @@ def test_new_product_page_renders_form(client: TestClient) -> None:
     assert 'class="product-name-suggestions" role="listbox" hidden' in response.text
     assert 'type="date"' in response.text
     assert 'type="time"' not in response.text
+    assert 'value="preparations 🍲"' in response.text
+    assert '<option value="meat 🥩" selected>meat 🥩</option>' in response.text
 
 
 def test_create_product_page_creates_product_and_shows_flash(client: TestClient) -> None:
@@ -289,6 +432,27 @@ def test_create_product_page_creates_product_and_shows_flash(client: TestClient)
     assert "Product created successfully" in response.text
     assert "Ricotta" in response.text
     assert "Open inventory" in response.text
+
+
+def test_create_product_page_preserves_prefixed_home_flash(client: TestClient) -> None:
+    """Creation should return to the app root when deployed below a URL prefix."""
+    with TestClient(
+        client.app, root_path="/frozen-vault", follow_redirects=False
+    ) as prefixed_client:
+        form_response = prefixed_client.get("/web/inventory/new")
+        assert 'name="return_to" value="/frozen-vault/"' in form_response.text
+
+        response = prefixed_client.post(
+            "/web/inventory", data=_html_form_payload(product_name="Chili con carne")
+        )
+
+    assert response.status_code == httpx.codes.SEE_OTHER
+    location = urlparse(response.headers["location"])
+    assert location.path == "/frozen-vault/"
+    assert parse_qs(location.query) == {
+        "flash": ["Product created successfully"],
+        "flash_level": ["success"],
+    }
 
 
 def test_create_product_page_allows_empty_description(client: TestClient) -> None:

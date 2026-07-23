@@ -27,20 +27,24 @@
       <div class="summary-side">
         {% include 'partials/_inventory_visual.html' %}
 
-        <div class="top-metrics">
-          <div class="metric-pill is-primary">
-            <span class="metric-label">Tracked items</span>
-            <strong>{{ total }}</strong>
-          </div>
-          <div class="metric-pill urgency-pill {% if expired_count > 0 %}is-danger{% elif soon_count > 0 %}is-warning{% endif %}">
-            <span class="metric-label">Need attention</span>
-            <strong>{{ soon_count + expired_count }}</strong>
-          </div>
-          <div class="metric-pill">
-            <span class="metric-label">Fresh later</span>
-            <strong>{{ fresh_count }}</strong>
-          </div>
+        <div class="home-freezer-preview-header">
+          <p class="eyebrow">All Freezers</p>
+          <a class="utility-link" href="{{ freezer_analytics_url }}">Open analytics</a>
         </div>
+        <nav class="top-metrics" aria-label="All Freezers summary">
+          <a class="metric-pill is-primary" href="{{ freezer_analytics_url }}" aria-label="Tracked entries: {{ freezer_summary.entry_count }}">
+            <span class="metric-label">Tracked entries</span>
+            <strong>{{ freezer_summary.entry_count }}</strong>
+          </a>
+          <a class="metric-pill" href="{{ freezer_analytics_url }}" aria-label="Known weight: {{ format_weight(freezer_summary.weight_g) }}">
+            <span class="metric-label">Known weight</span>
+            <strong>{{ format_weight(freezer_summary.weight_g) }}</strong>
+          </a>
+          <a class="metric-pill" href="{{ freezer_analytics_url }}" aria-label="Product groups: {{ freezer_summary.name_count }}">
+            <span class="metric-label">Product groups</span>
+            <strong>{{ freezer_summary.name_count }}</strong>
+          </a>
+        </nav>
       </div>
     </section>
 
@@ -58,7 +62,7 @@
           {% set icon_class = 'app-icon app-icon-md' %}
           {% include 'partials/_heroicon.html' %}
           <strong>Inventory grid</strong>
-          <p class="muted-text">Full table view for sorting, scanning, and managing products.</p>
+          <p class="muted-text">Full inventory view for sorting, scanning, and managing products.</p>
         </a>
         <a class="home-shortcut-card" href="{{ url_path_for(request, 'inventory_soon') }}">
           {% set icon_name = 'clock' %}

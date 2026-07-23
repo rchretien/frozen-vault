@@ -36,6 +36,9 @@ compose=(docker compose --env-file "${ENV_FILE}" -f "${COMPOSE_FILE}")
 printf 'Pulling latest API image...\n'
 "${compose[@]}" pull api
 
+printf 'Applying pending database migrations...\n'
+"${compose[@]}" run --rm api migrate
+
 IMAGE_DIGEST="$(docker image inspect "${IMAGE_REF}" --format '{{index .RepoDigests 0}}' 2>/dev/null || true)"
 IMAGE_DIGEST="${IMAGE_DIGEST:-unknown}"
 DEPLOYED_AT="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"

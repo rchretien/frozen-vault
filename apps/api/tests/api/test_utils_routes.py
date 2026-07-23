@@ -36,6 +36,7 @@ def test_get_product_type_list(client: TestClient) -> None:
     body = response.json()
     assert len(body["product_type_list"]) >= 1
     assert any("poultry" in item["name"].lower() for item in body["product_type_list"])
+    assert any("preparations" in item["name"].lower() for item in body["product_type_list"])
 
 
 def test_get_product_location_list(client: TestClient) -> None:

@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+
+{% macro analytics_members(items) %}
+  <div class="analytics-breakdown">
+    <strong>Made of</strong>
+    <ul class="analytics-breakdown-list">
+      {% for item in items %}
+        <li class="analytics-breakdown-item">
+          <div>
+            <strong>{{ item.name }}</strong>
+            <span>{{ product_location_label(item.location) }} · expires {{ format_date_display(item.expiry_date) }}</span>
+          </div>
+          <span>{{ item.quantity }} {{ product_unit_label(item.unit) }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endmacro %}
+
+{% block title %}Freezer analytics · FrozenVault{% endblock %}
+{% block meta_description %}Compare freezer quantities by category, product name, and expiry date in FrozenVault.{% endblock %}
+
+{% block content %}
+  <section class="screen-stack analytics-screen">
+    <section class="panel analytics-header" aria-labelledby="analytics-title">
+      <div>
+        <p class="eyebrow">Stored inventory</p>
+        <h2 id="analytics-title" class="screen-headline">{{ scope_label }} overview</h2>
+        <p class="hero-copy">Compare categories and product groups without mixing weight, boxes, and bottles.</p>
+      </div>
+      <a class="secondary-button" href="{{ inventory_url }}">Open inventory</a>
+    </section>
+
+    <nav class="urgency-tabs analytics-scope-tabs" aria-label="Freezer analytics scope">
+      {% for option in scope_options %}
+        <a class="urgency-tab {% if option.key == selected_scope %}is-active{% endif %}" href="{{ option.url }}" {% if option.key == selected_scope %}aria-current="page"{% endif %}>
+          <span>{{ option.label }}</span>
+          <strong>{{ option.entry_count }}</strong>
+        </a>
+      {% endfor %}
+    </nav>
+
+    <dl class="analytics-kpi-grid" aria-label="{{ scope_label }} key metrics">
+      <div class="metric-pill analytics-kpi is-primary">
+        <dt class="metric-label">Tracked entries</dt>
+        <dd>{{ summary.entry_count }}</dd>
+      </div>
+      <div class="metric-pill analytics-kpi">
+        <dt class="metric-label">Known weight</dt>
+        <dd>{{ format_weight(summary.weight_g) }}</dd>
+      </div>
+      <div class="metric-pill analytics-kpi">
+        <dt class="metric-label">Boxes</dt>
+        <dd>{{ summary.boxes }}</dd>
+      </div>
+      <div class="metric-pill analytics-kpi">
+        <dt class="metric-label">Bottles</dt>
+        <dd>{{ summary.bottles }}</dd>
+      </div>
+      <div class="metric-pill analytics-kpi">
+        <dt class="metric-label">Product types</dt>
+        <dd>{{ summary.type_count }}</dd>
+      </div>
+      <div class="metric-pill analytics-kpi">
+        <dt class="metric-label">Product groups</dt>
+        <dd>{{ summary.name_count }}</dd>
+      </div>
+    </dl>
+
+    {% if summary.entry_count %}
+      <div class="analytics-chart-grid">
+        <section class="panel analytics-chart" aria-labelledby="category-mix-title">
+          <div class="analytics-chart-header">
+            <div>
+              <p class="eyebrow">Broad view</p>
+              <h3 id="category-mix-title" class="section-title">By category</h3>
+            </div>
+            <span class="micro-tag">{{ summary.type_count }} categor{% if summary.type_count == 1 %}y{% else %}ies{% endif %}</span>
+          </div>
+          <p class="analytics-chart-note">Bar length compares known gram weight. Other units stay separate.</p>
+
+          <div class="analytics-bars" role="group" aria-label="Category quantity distribution">
+            {% for row in summary.type_breakdown %}
+              {% set type_visual = product_type_visual(row.type) %}
+              <details class="analytics-bar-row tone-{{ type_visual.tone }}">
+                <summary class="analytics-breakdown-summary">
+                  <div class="analytics-bar-heading">
+                    <div class="analytics-bar-identity">
+                      <span class="product-card-icon analytics-type-icon" aria-hidden="true">
+                        {% include 'partials/_product_type_icon.html' %}
+                      </span>
+                      <div>
+                        <strong>{{ type_visual.label }}</strong>
+                        <span>{{ row.entry_count }} entr{% if row.entry_count == 1 %}y{% else %}ies{% endif %}</span>
+                      </div>
+                    </div>
+                    <strong>
+                      {% if row.weight_g %}{{ format_weight(row.weight_g) }}{% elif row.boxes %}{{ row.boxes }} box{% if row.boxes != 1 %}es{% endif %}{% else %}{{ row.bottles }} bottle{% if row.bottles != 1 %}s{% endif %}{% endif %}
+                    </strong>
+                  </div>
+                  {% if row.weight_g %}
+                    <div class="analytics-bar-track" aria-hidden="true">
+                      <span class="analytics-bar-fill" style="--bar-value: {{ row.weight_percentage }}%"></span>
+                    </div>
+                  {% endif %}
+                  <div class="analytics-unit-summary">
+                    {% if row.weight_g %}<span>{{ format_weight(row.weight_g) }}</span>{% endif %}
+                    {% if row.boxes %}<span>{{ row.boxes }} box{% if row.boxes != 1 %}es{% endif %}</span>{% endif %}
+                    {% if row.bottles %}<span>{{ row.bottles }} bottle{% if row.bottles != 1 %}s{% endif %}</span>{% endif %}
+                  </div>
+                </summary>
+                {{ analytics_members(row['items']) }}
+              </details>
+            {% endfor %}
+          </div>
+        </section>
+
+        <section class="panel analytics-chart" aria-labelledby="product-groups-title">
+          <div class="analytics-chart-header">
+            <div>
+              <p class="eyebrow">Detailed view</p>
+              <h3 id="product-groups-title" class="section-title">By product name</h3>
+            </div>
+            <span class="micro-tag">{{ summary.name_count }} group{% if summary.name_count != 1 %}s{% endif %}</span>
+          </div>
+          <p class="analytics-chart-note">Capitalization, spacing, and one strict fuzzy match are grouped together.</p>
+
+          <div class="analytics-bars" role="group" aria-label="Product quantity distribution">
+            {% for row in summary.name_breakdown %}
+              {% set type_visual = product_type_visual(row.type) %}
+              <details class="analytics-bar-row tone-{{ type_visual.tone }}">
+                <summary class="analytics-breakdown-summary">
+                  <div class="analytics-bar-heading">
+                    <div>
+                      <strong>{{ row.name }}</strong>
+                      <span>{{ type_visual.label }} · {{ row.entry_count }} entr{% if row.entry_count == 1 %}y{% else %}ies{% endif %}</span>
+                    </div>
+                    <strong>
+                      {% if row.weight_g %}{{ format_weight(row.weight_g) }}{% elif row.boxes %}{{ row.boxes }} box{% if row.boxes != 1 %}es{% endif %}{% else %}{{ row.bottles }} bottle{% if row.bottles != 1 %}s{% endif %}{% endif %}
+                    </strong>
+                  </div>
+                  {% if row.weight_g %}
+                    <div class="analytics-bar-track" aria-hidden="true">
+                      <span class="analytics-bar-fill" style="--bar-value: {{ row.weight_percentage }}%"></span>
+                    </div>
+                  {% endif %}
+                  <div class="analytics-unit-summary">
+                    {% if row.weight_g %}<span>{{ format_weight(row.weight_g) }}</span>{% endif %}
+                    {% if row.boxes %}<span>{{ row.boxes }} box{% if row.boxes != 1 %}es{% endif %}</span>{% endif %}
+                    {% if row.bottles %}<span>{{ row.bottles }} bottle{% if row.bottles != 1 %}s{% endif %}</span>{% endif %}
+                  </div>
+                </summary>
+                {{ analytics_members(row['items']) }}
+              </details>
+            {% endfor %}
+          </div>
+        </section>
+
+        <section class="panel analytics-chart analytics-expiry-panel" aria-labelledby="expiry-distribution-title">
+          <div class="analytics-chart-header">
+            <div>
+              <p class="eyebrow">Calendar view</p>
+              <h3 id="expiry-distribution-title" class="section-title">Products by expiry date</h3>
+            </div>
+            <span class="micro-tag">{{ summary.entry_count }} total</span>
+          </div>
+          <p class="analytics-chart-note">Each bar counts inventory entries expiring on that date.</p>
+
+          <div class="expiry-chart-scroll" role="group" aria-label="Expiry date distribution">
+            <div class="expiry-chart">
+              <div class="expiry-y-axis" aria-label="Product count">
+                <strong>{{ summary.max_expiry_count }}</strong>
+                <span>Product count</span>
+                <small>0</small>
+              </div>
+              <div class="expiry-columns">
+                {% for bucket in summary.expiry_distribution %}
+                  <div class="expiry-column {% if bucket.is_expired %}is-expired{% endif %}" role="group" aria-label="{{ bucket.date }}: {{ bucket.entry_count }} product{% if bucket.entry_count != 1 %}s{% endif %}">
+                    <div class="expiry-bar-area">
+                      <strong>{{ bucket.entry_count }}</strong>
+                      <span class="expiry-bar" style="--bar-height: {{ bucket.height_percentage }}%" aria-hidden="true"></span>
+                    </div>
+                    <time datetime="{{ bucket.date }}">{{ bucket.label }}<small>{{ bucket.year }}</small></time>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    {% else %}
+      <section class="panel analytics-empty-state">
+        {% set icon_name = 'archive-box' %}
+        {% set icon_class = 'app-icon app-icon-lg' %}
+        {% include 'partials/_heroicon.html' %}
+        <div>
+          <h3 class="section-title">No products in this scope</h3>
+          <p class="muted-text">Add or move products into a freezer to build this overview.</p>
+        </div>
+      </section>
+    {% endif %}
+  </section>
+{% endblock %}

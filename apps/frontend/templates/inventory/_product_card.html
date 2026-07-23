@@ -38,5 +38,13 @@
         </div>
       </div>
     </a>
+
+    <div class="card-actions utility-actions desktop-card-actions">
+      <a class="secondary-button" href="{{ edit_url }}">Edit</a>
+      <form action="{{ url_path_for(request, 'delete_product_page', product_id=product.id) }}" method="post" data-confirm="Delete {{ product.product_name }}?">
+        {% if current_url is defined %}<input type="hidden" name="return_to" value="{{ current_url }}">{% endif %}
+        <button class="danger-button desktop-delete-button" type="submit">Delete</button>
+      </form>
+    </div>
   </article>
 </div>

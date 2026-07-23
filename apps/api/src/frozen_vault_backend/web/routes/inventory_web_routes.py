@@ -1,7 +1,7 @@
 """Server-rendered inventory routes for the mobile web UI."""
 
 from datetime import datetime
-from typing import Any
+from typing import Annotated, Any
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Form, HTTPException, Query, Request
@@ -41,6 +41,12 @@ SORT_OPTIONS = {
     "expiry": (OrderByEnum.EXPIRY_DATE, True),
     "name_asc": (OrderByEnum.NAME, True),
     "name_desc": (OrderByEnum.NAME, False),
+}
+FREEZER_ANALYTICS_SCOPES = {
+    "all": ("all", "All Freezers"),
+    "big-freezer": (ProductLocationEnum.BIG_FREEZER.value, "Big Freezer"),
+    "small-freezer": (ProductLocationEnum.SMALL_FREEZER.value, "Small Freezer"),
+    "refrigerator": (ProductLocationEnum.REFRIGERATOR.value, "Refrigerator"),
 }
 
 
@@ -306,7 +312,7 @@ def _empty_form_data() -> dict[str, str]:
         "expiry_date": "",
         "expiry_date_date": "",
         "product_location": ProductLocationEnum.REFRIGERATOR.value,
-        "product_type": ProductTypeEnum.FRUIT.value,
+        "product_type": ProductTypeEnum.MEAT.value,
     }
 
 
@@ -422,13 +428,13 @@ def _get_home_context(*, request: Request, session: SessionDependency) -> dict[s
     urgent_preview = expired_preview + [
         ProductRead.from_model(product) for product in soon_preview_response.data
     ]
+    freezer_summary = product_crud.get_freezer_analytics(session=session)["all"]
     context.update(
         {
             "screen_title": "Welcome",
             "screen_subtitle": "See what needs attention, then jump straight into the right task.",
-            "fresh_count": max(
-                context["total"] - context["soon_count"] - context["expired_count"], 0
-            ),
+            "freezer_summary": freezer_summary,
+            "freezer_analytics_url": _url_path_for(request, "freezer_analytics_page"),
             "urgent_preview": urgent_preview[:4],
             "recent_preview": context["products"][:5],
         }
@@ -499,6 +505,45 @@ async def home_page(request: Request, session: SessionDependency) -> HTMLRespons
     """Render the welcome dashboard page."""
     context = _get_home_context(request=request, session=session)
     return templates.TemplateResponse(request=request, name="home/index.html", context=context)
+
+
+@inventory_web_router.get(
+    "/web/analytics", response_class=HTMLResponse, name="freezer_analytics_page"
+)
+def freezer_analytics_page(
+    request: Request, session: SessionDependency, scope: Annotated[str, Query()] = "all"
+) -> HTMLResponse:
+    """Render freezer analytics for the combined or individual freezer scope."""
+    selected_scope = scope if scope in FREEZER_ANALYTICS_SCOPES else "all"
+    summary_key, scope_label = FREEZER_ANALYTICS_SCOPES[selected_scope]
+    analytics = product_crud.get_freezer_analytics(session=session)
+    summary = analytics[summary_key]
+
+    scope_options = [
+        {
+            "key": key,
+            "label": label,
+            "entry_count": analytics[analytics_key]["entry_count"],
+            "url": _url_path_with_query(
+                request, "freezer_analytics_page", query_params={"scope": key}
+            ),
+        }
+        for key, (analytics_key, label) in FREEZER_ANALYTICS_SCOPES.items()
+    ]
+    return templates.TemplateResponse(
+        request=request,
+        name="analytics/index.html",
+        context={
+            "active_nav": "analytics",
+            "screen_title": "Freezer analytics",
+            "screen_subtitle": "Compare stored quantities and expiry dates by freezer.",
+            "scope_label": scope_label,
+            "selected_scope": selected_scope,
+            "scope_options": scope_options,
+            "summary": summary,
+            "inventory_url": _url_path_for(request, "inventory_home"),
+        },
+    )
 
 
 @inventory_web_router.get("/web/inventory", response_class=HTMLResponse, name="inventory_home")
@@ -596,8 +641,11 @@ async def render_inventory_list_fragment(
 
 
 @inventory_web_router.get("/web/inventory/new", response_class=HTMLResponse)
-async def new_product_page(request: Request, return_to: str = Query(default="/")) -> HTMLResponse:
+async def new_product_page(
+    request: Request, return_to: str | None = Query(default=None)
+) -> HTMLResponse:
     """Render the add-product page."""
+    safe_return_to = _safe_return_to(return_to, fallback=_url_path_for(request, "home_page"))
     return _render_form_page(
         request=request,
         title="Add product",
@@ -605,7 +653,7 @@ async def new_product_page(request: Request, return_to: str = Query(default="/")
         action_url=_url_path_for(request, "create_product_page"),
         form_data=_empty_form_data(),
         active_nav="add",
-        return_to=return_to,
+        return_to=safe_return_to,
     )
 
 
@@ -621,9 +669,10 @@ async def create_product_page(
     expiry_date_date: str = Form(default=""),
     product_location: str = Form(default=""),
     product_type: str = Form(default=""),
-    return_to: str = Form(default="/"),
+    return_to: str | None = Form(default=None),
 ) -> Response:
     """Create a product from the mobile form and redirect back home."""
+    safe_return_to = _safe_return_to(return_to, fallback=_url_path_for(request, "home_page"))
     form_data = _product_from_form(
         product_name=product_name,
         description=description,
@@ -646,7 +695,7 @@ async def create_product_page(
             form_data=form_data,
             errors=missing_errors,
             active_nav="add",
-            return_to=return_to,
+            return_to=safe_return_to,
         )
 
     try:
@@ -666,7 +715,7 @@ async def create_product_page(
             form_data=form_data,
             errors=errors,
             active_nav="add",
-            return_to=return_to,
+            return_to=safe_return_to,
         )
 
     try:
@@ -680,10 +729,10 @@ async def create_product_page(
             form_data=form_data,
             errors={"__all__": str(exc)},
             active_nav="add",
-            return_to=return_to,
+            return_to=safe_return_to,
         )
 
-    return _redirect_with_flash(return_to=return_to, message="Product created successfully")
+    return _redirect_with_flash(return_to=safe_return_to, message="Product created successfully")
 
 
 @inventory_web_router.get("/web/inventory/{product_id}/edit", response_class=HTMLResponse)

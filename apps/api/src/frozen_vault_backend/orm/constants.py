@@ -13,4 +13,5 @@ FREEZER_STORAGE_DAYS: dict[ProductTypeEnum, int] = {
     ProductTypeEnum.FRUIT: 90,
     ProductTypeEnum.DESSERT: 120,
     ProductTypeEnum.DAIRY: 90,
+    ProductTypeEnum.PREPARATIONS: 120,
 }

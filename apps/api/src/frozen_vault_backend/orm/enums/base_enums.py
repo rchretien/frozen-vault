@@ -16,6 +16,7 @@ class ProductTypeEnum(str, Enum):
     FRUIT = "fruit 🍓"
     DESSERT = "dessert 🍨"
     DAIRY = "dairy 🥛"
+    PREPARATIONS = "preparations 🍲"
 
 
 class ProductLocationEnum(str, Enum):
