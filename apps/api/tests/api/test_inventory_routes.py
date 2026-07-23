@@ -68,6 +68,19 @@ def test_create_product_and_list(client: TestClient) -> None:
     assert product["image_location"] == "file_path"
 
 
+def test_create_preparation_product_uses_120_day_quality_window(client: TestClient) -> None:
+    """Prepared dishes should be accepted and use their configured quality window."""
+    payload = _product_payload(product_name="Bolognese", product_type="preparations 🍲")
+    create_response = client.post("/inventory/create", json=payload)
+
+    assert create_response.status_code == httpx.codes.CREATED
+    product = client.get("/inventory/list").json()["products"][0]
+    creation_date = datetime.fromisoformat(product["creation_date"])
+    best_quality_until = datetime.fromisoformat(product["best_quality_until"])
+    assert product["product_type"] == "preparations 🍲"
+    assert best_quality_until == creation_date + timedelta(days=120)
+
+
 @pytest.mark.parametrize(
     ("product_type", "storage_days"),
     [

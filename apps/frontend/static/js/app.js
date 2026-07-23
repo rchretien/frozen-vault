@@ -210,7 +210,7 @@ function closeOpenSwipeCards(exceptCard = null) {
 }
 
 function shouldIgnoreSwipeStart(target) {
-  return Boolean(target.closest(".product-card-swipe-actions"));
+  return Boolean(target.closest(".product-card-swipe-actions, .desktop-card-actions"));
 }
 
 document.addEventListener("pointerdown", (event) => {
@@ -240,8 +240,6 @@ document.addEventListener("pointerdown", (event) => {
     hasHorizontalIntent: false,
     didSwipe: false,
   };
-
-  surface.setPointerCapture(event.pointerId);
 });
 
 document.addEventListener("pointermove", (event) => {
@@ -266,6 +264,7 @@ document.addEventListener("pointermove", (event) => {
 
     activeSwipe.hasHorizontalIntent = true;
     activeSwipe.card.classList.add("is-dragging");
+    activeSwipe.surface.setPointerCapture(event.pointerId);
   }
 
   event.preventDefault();

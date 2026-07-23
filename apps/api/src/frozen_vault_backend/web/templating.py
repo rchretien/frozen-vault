@@ -68,6 +68,7 @@ _PRODUCT_TYPE_VISUALS: dict[str, dict[str, str]] = {
     "fruit 🍓": {"icon": "sun", "tone": "rose", "label": "Fruit"},
     "dessert 🍨": {"icon": "cake", "tone": "gold", "label": "Dessert"},
     "dairy 🥛": {"icon": "archive-box", "tone": "ice", "label": "Dairy"},
+    "preparations 🍲": {"icon": "circle-stack", "tone": "violet", "label": "Preparations"},
 }
 
 
@@ -88,6 +89,13 @@ def product_location_label(value: Any) -> str:
 def product_unit_label(value: Any) -> str:
     """Return the printable unit value instead of Enum repr text."""
     return str(getattr(value, "value", value))
+
+
+def format_weight(grams: int) -> str:
+    """Format a known gram quantity without changing its stored unit."""
+    if grams < 1000:
+        return f"{grams} g"
+    return f"{grams / 1000:g} kg"
 
 
 def url_path_for(request: Request, route_name: str, **path_params: object) -> str:
@@ -117,6 +125,7 @@ templates.env.globals.update(
     product_type_visual=product_type_visual,
     product_location_label=product_location_label,
     product_unit_label=product_unit_label,
+    format_weight=format_weight,
     url_path_for=url_path_for,
     static_asset_version=static_asset_version,
 )
